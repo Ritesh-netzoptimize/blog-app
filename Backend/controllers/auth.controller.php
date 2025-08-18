@@ -80,7 +80,7 @@ class AuthController {
 
         $user = new User($this->db);
 
-        $stmt = $user->conn->prepare("SELECT user_id, username, email, password FROM users WHERE email = :email");
+        $stmt = $user->conn->prepare("SELECT user_id, username, email, password, role FROM users WHERE email = :email");
         $stmt->execute([':email' => $email]);
         $dbUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -108,6 +108,7 @@ class AuthController {
         $_SESSION['user_id']  = $dbUser['user_id'];
         $_SESSION['username'] = $dbUser['username'];
         $_SESSION['email']    = $dbUser['email'];
+        $_SESSION['role']    = $dbUser['role'];
 
         setcookie('user_id', $dbUser['user_id'], time() + 3600, '/', '', false, true);
         setcookie('username', $dbUser['username'], time() + 3600, '/', '', false, true);
@@ -120,7 +121,8 @@ class AuthController {
             'user' => [
                 'user_id' => $dbUser['user_id'],
                 'username' => $dbUser['username'],
-                'email' => $dbUser['email']
+                'email' => $dbUser['email'],
+                'role' => $dbUser['role']
             ]
         ]);
     }

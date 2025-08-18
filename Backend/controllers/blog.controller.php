@@ -18,7 +18,7 @@ class BlogController {
         $title = trim($data['title']);
         $content = trim($data['content']);
         $author_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-
+        var_dump($author_id);
         if (!$author_id) {
             return $this->sendJson([
                 'success' => false,
