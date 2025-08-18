@@ -1,0 +1,65 @@
+<?php
+require_once(__DIR__ . '/../config/db.php');
+
+class Blog {
+    public $conn;
+
+    public function __construct($db) {
+        $this->conn = $db;
+    }
+
+    public function create($title, $content, $author_id) {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO blogs (title, content, author_id) VALUES (:title, :content, :author_id)"
+        );
+
+        $result = $stmt->execute([
+            ':title' => $title,
+            ':content' => $content,
+            ':author_id' => $author_id
+        ]);
+
+        if ($result) {
+            return $this->conn->lastInsertId();
+        }
+        return false;
+    }
+
+    public function delete($blog_id) {
+
+        $stmt = $this->conn->prepare(
+            "SELECT blog_id FROM blogs WHERE blog_id = :blog_id"
+        );
+        $stmt->execute([':blog_id' => $blog_id]);
+        if ($stmt->rowCount() === 0) {
+            return false;
+        }
+        $stmt = $this->conn->prepare(
+            "DELETE FROM blogs WHERE blog_id = :blog_id"
+        );
+        $result = $stmt->execute([':blog_id' => $blog_id]);
+        return $result;
+    }
+
+    public function fetchAllBlogs() {
+        $stmt = $this->conn->prepare("SELECT * FROM blogs ORDER BY created_at DESC");
+        $stmt->execute();
+        $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($blogs) {
+            return $blogs;
+        }
+        return [];
+    }
+
+    public function fetchSingleBlog($blog_id) {
+        $stmt = $this->conn->prepare("SELECT * FROM blogs WHERE blog_id = :blog_id");
+        $stmt->bindParam(":blog_id", $blog_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $blog = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($blog) {
+            return $blog;
+        }
+        return false;
+    }
+}
+?>
