@@ -17,7 +17,7 @@ class BlogController {
         }
         $title = trim($data['title']);
         $content = trim($data['content']);
-        $author_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        $author_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $data['author_id'];
         var_dump($author_id);
         if (!$author_id) {
             return $this->sendJson([
@@ -82,6 +82,10 @@ class BlogController {
             session_start();
         }
         $author_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        if (!$author_id) {
+            $author_id = isset($_COOKIE['user_id']) ? $_COOKIE['user_id'] : null;
+        }
+
 
         if (!$author_id) {
             return $this->sendJson([

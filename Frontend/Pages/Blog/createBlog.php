@@ -1,19 +1,16 @@
 <?php
 session_start();
 
-// Check if user is logged in
 if (!isset($_SESSION['user'])) {
     die("You must be logged in to create a blog.");
 }
 
-// Fetch logged-in user ID
 $author_id = $_SESSION['user']['user_id'];
 
 if (!$author_id) {
     die("User ID not found in session.");
 }
 
-// Handle form submission
 $responseMessage = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'] ?? '';
@@ -25,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $postData = json_encode([
             "title" => $title,
             "content" => $content,
+            "author_id" => $author_id
         ]);
 
         $url = "http://localhost/blog-app/backend/api/v1/blog/create";
@@ -36,13 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = curl_exec($ch);
         curl_close($ch);
 
-        $json_response = json_decode($result, true);
+        $cleanResult = preg_replace('/^[^{]+/', '', $result);
+        $json_response = json_decode($cleanResult, true);
+       
 
         if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
             $responseMessage = "Blog created successfully!";
         } else {
-            var_dump($result);
-            $responseMessage = "Failed to create blog. Response: " . htmlspecialchars($result);
+            $responseMessage = "Failed to create blog. Response: " . ($result);
         }
     }
 }

@@ -52,7 +52,7 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
                        <div class="blog-actions">
                             <?php if ($is_loggedIn): ?>
                                 <?php if ($is_admin): ?>
-                                    <a href="">Delete</a>
+                                    <a href="/blog-app/frontend/Pages/blog/delete.php?id=<?php echo $blog['blog_id'] ?>">Delete</a>
                                     <a href="">Edit</a>
                                 <?php endif; ?>
                                 <a href="">View</a>

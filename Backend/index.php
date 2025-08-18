@@ -14,7 +14,6 @@ $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $segments = explode('/', $uri);
 
 // Expecting: /api/v1/auth/login OR /api/v1/blog/create
-echo "API route: " . implode('/', $segments) . "\n";
 if (count($segments) < 4 || $segments[2] !== "api" || $segments[3] !== "v1") {
     http_response_code(404);
     echo json_encode(["success" => false, "message" => "Invalid API route"]);
