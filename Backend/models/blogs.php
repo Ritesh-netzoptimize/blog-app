@@ -74,5 +74,16 @@ class Blog {
         }
         return false;
     }
+
+    public function findBlogById($blog_id) {
+        $stmt = $this->conn->prepare("SELECT * FROM blogs WHERE blog_id = :blog_id");
+        $stmt->bindParam(":blog_id", $blog_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $blog = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($blog) {
+            return $blog;
+        }
+        return false;
+    }
 }
 ?>

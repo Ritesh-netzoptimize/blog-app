@@ -36,7 +36,7 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
 </head>
 <body class="body-container">
     <?php include_once '../../Templates/header.php'; ?>
-    <a  class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
+    <a class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
     <div class="blog-content">
         <h1 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h1>
         <p class="blog-text"><?php echo htmlspecialchars($blog['content']); ?></p>

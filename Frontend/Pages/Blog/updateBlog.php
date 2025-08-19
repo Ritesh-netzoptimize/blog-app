@@ -36,10 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title   = trim($_POST['title'] ?? '');
     $content = trim($_POST['content'] ?? '');
-if (!isset($_SESSION['user_id'])) {
-            $responseMessage = "Session error: User ID not found. Please log in again.";
-            return;
-        }
+    if (!isset($_SESSION['user_id'])) {
+                $responseMessage = "Session error: User ID not found. Please log in again.";
+                return;
+            }
     if ($title === '' || $content === '') {
         $responseMessage = "Title and content are required.";
     } else {

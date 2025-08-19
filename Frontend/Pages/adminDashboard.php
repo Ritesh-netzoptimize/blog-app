@@ -40,6 +40,7 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
 <body>
     <?php include_once '../Templates/header.php'; ?>
     <div class="blogs-container">
+        <a href="/blog-app/frontend/index.php">Back</a>
         <h1>All Blogs</h1>
         <?php if ($responseMessage): ?>
             <div class="response-message"><?php echo $responseMessage; ?></div>

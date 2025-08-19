@@ -65,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="auth-container">
+
         <h1>Register page</h1>
 
         <?php if ($responseMessage): ?>

@@ -4,16 +4,19 @@ header('Content-Type: application/json');
 require_once(__DIR__ . '/config/db.php');
 require_once(__DIR__ . '/controllers/auth.controller.php');
 require_once(__DIR__ . '/controllers/blog.controller.php');
+require_once(__DIR__ . '/controllers/comment.controller.php');
 
 $db = (new Database())->getConnection();
 $auth_controller = new AuthController($db);
 $blog_controller = new BlogController($db);
+$comment_controller = new CommentController($db);
 
 $input = json_decode(file_get_contents("php://input"), true);
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $segments = explode('/', $uri);
 
-// Expecting: /api/v1/auth/login OR /api/v1/blog/create
+// Expecting: /api/v1/auth/login OR /api/v1/blog/create OR /api/v1/comment/create, segments[2] = api, segments[3] = v1, segments[4] = resource (auth, blog, comment), segments[5] = action (login, create, etc.), segments[6] = optional resource ID (e.g., blog ID for fetching a single blog).
+
 if (count($segments) < 4 || $segments[2] !== "api" || $segments[3] !== "v1") {
     http_response_code(404);
     echo json_encode(["success" => false, "message" => "Invalid API route"]);
@@ -59,6 +62,37 @@ switch ($resource) {
             }
         }                                                   
         else echo json_encode(["success" => false, "message" => "Invalid blog action"]);
+        break;
+        
+    case 'comment':
+        if ($action === "create") $comment_controller->create_comment($input);
+        else if ($action === "fetch-by-blog") {
+            $blog_id = $segments[6] ?? null;
+            if ($blog_id) {
+                $comment_controller->fetch_comments_by_blog_id($blog_id);
+            } else {
+                echo json_encode(["success" => false, "message" => "Blog ID is required to fetch comments"]);
+            }
+        }
+        else if ($action === "delete") {
+            $comment_id = $segments[6] ?? null;
+            if ($comment_id) {
+                $comment_controller->delete_comment($comment_id, $input);
+            }
+            else {
+                echo json_encode(["success" => false, "message" => "Comment ID is required for deletion"]);
+            }
+        }
+        else if ($action === "update") {
+            $comment_id = $segments[6] ?? null;
+            if ($comment_id && isset($input['comment'])) {
+                $comment_controller->update_comment($comment_id, $input);
+            }
+            else {
+                echo json_encode(["success" => false, "message" => "Comment ID and content are required for update"]);
+            }
+        }
+        else echo json_encode(["success" => false, "message" => "Invalid comment action"]);
         break;
 
     default:

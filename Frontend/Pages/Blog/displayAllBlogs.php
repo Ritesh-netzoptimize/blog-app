@@ -54,7 +54,7 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
                                 <a href="/blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=<?php echo $blog['blog_id'] ?>">View</a>
                             <?php endif; ?>
                         </div>
-                        <h2><?php echo htmlspecialchars($blog['title']); ?></h2>
+                        <h2><?php echo ($blog['title']); ?></h2>
                         <p><?php echo htmlspecialchars(substr($blog['content'], 0, 100) . '...'); ?></p>
                         <p class="blog-author">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
                         <p class="blog-date">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
