@@ -43,6 +43,8 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
         <p class="blog-meta">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
         <p class="blog-meta">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
         <a class="back-link" href="/blog-app/frontend/index.php">Back to all blogs</a>
+        <?php include_once '../Comment/create.php'; ?>
+        <?php include_once '../Comment/display.php'; ?>
     </div>
 </body>
 

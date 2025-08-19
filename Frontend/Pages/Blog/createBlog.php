@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <?php include_once '../../Templates/header.php'; ?>
     <div class="container">
-            <a  class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
+        <a  class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
 
         <h1>Create a New Blog</h1>
 
