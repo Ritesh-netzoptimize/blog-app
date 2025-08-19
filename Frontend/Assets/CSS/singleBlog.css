@@ -6,6 +6,11 @@
     padding: 0;
 }
 
+.back-button {
+    padding: 1rem;
+    background: white;
+}
+
 .blog-content {
     max-width: 800px;
     margin: 40px auto;

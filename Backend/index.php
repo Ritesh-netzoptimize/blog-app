@@ -44,7 +44,7 @@ switch ($resource) {
         elseif ($action === "delete") {
             $blog_id = $segments[6] ?? null;
             if ($blog_id) {
-                $blog_controller->delete_blog($blog_id);
+                $blog_controller->delete_blog($blog_id, $input);
             } else {
                 echo json_encode(["success" => false, "message" => "Blog ID is required for deletion"]);
             }

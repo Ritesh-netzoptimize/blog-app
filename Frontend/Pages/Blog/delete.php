@@ -16,10 +16,15 @@ var_dump($blogId);
 
 $URL = "http://localhost/blog-app/backend/api/v1/blog/delete/$blogId";
 $ch = curl_init($URL);
+$payload = json_encode([
+            "author_id" => $_SESSION['user_id'] ?? null
+        ]);
 
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
 
 $result = curl_exec($ch);
 curl_close($ch);
@@ -31,7 +36,7 @@ $json_response = json_decode($cleanResult, true);
 var_dump($json_response);
 if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
     echo "Blog deleted successfully!";
-    header("Location: /blog-app/frontend/Pages/allBlogs.php");
+    header("Location: /blog-app/frontend/Pages/adminDashboard.php");
     exit;
 } else {
     die("Failed to delete blog. Response: " . htmlspecialchars($result));

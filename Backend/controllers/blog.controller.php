@@ -77,11 +77,12 @@ class BlogController {
         ]);
     }
 
-    public function delete_blog($blog_id) {
+    public function delete_blog($blog_id, $data) {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        $author_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        $author_id = trim($data['author_id']) ?? $_SESSION['user_id'] ?? null;
+
         if (!$author_id) {
             $author_id = isset($_COOKIE['user_id']) ? $_COOKIE['user_id'] : null;
         }

@@ -36,12 +36,13 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
 </head>
 <body class="body-container">
     <?php include_once '../../Templates/header.php'; ?>
+    <a  class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
     <div class="blog-content">
         <h1 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h1>
         <p class="blog-text"><?php echo htmlspecialchars($blog['content']); ?></p>
         <p class="blog-meta">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
         <p class="blog-meta">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
-        <a class="back-link" href="">Back to all blogs</a>
+        <a class="back-link" href="/blog-app/frontend/index.php">Back to all blogs</a>
     </div>
 </body>
 
