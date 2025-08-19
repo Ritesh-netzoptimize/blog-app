@@ -25,7 +25,7 @@ $result = curl_exec($ch);
 curl_close($ch);
 var_dump($result);
 $cleanResult = preg_replace('/^[^{]+/', '', $result);
-var_dump(cleanResult);
+var_dump($cleanResult);
 
 $json_response = json_decode($cleanResult, true);
 var_dump($json_response);

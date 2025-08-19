@@ -53,16 +53,16 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
                             <?php if ($is_loggedIn): ?>
                                 <?php if ($is_admin): ?>
                                     <a href="/blog-app/frontend/Pages/blog/delete.php?id=<?php echo $blog['blog_id'] ?>">Delete</a>
-                                    <a href="">Edit</a>
+                                    <a href="/blog-app/frontend/Pages/blog/updateBlog.php?id=<?php echo $blog['blog_id'] ?>">Edit</a>
                                 <?php endif; ?>
-                                <a href="">View</a>
+                                <a href="/blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=<?php echo $blog['blog_id'] ?>">View</a>
                             <?php else: ?>
                                 <a href="">View</a>
                             <?php endif; ?>
                         </div>
 
                         <h2><?php echo htmlspecialchars($blog['title']); ?></h2>
-                        <p><?php echo htmlspecialchars($blog['content']); ?></p>
+                        <p><?php echo htmlspecialchars(substr($blog['content'], 0, 100) . '...'); ?></p>
                         <p class="blog-author">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
                         <p class="blog-date">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
                     </li>

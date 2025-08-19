@@ -51,6 +51,19 @@ class Blog {
         return [];
     }
 
+    public function updateBlog($blog_id, $title, $content, $author_id) {
+        $stmt = $this->conn->prepare(
+            "UPDATE blogs SET title = :title, content = :content, author_id = :author_id WHERE blog_id = :blog_id"
+        );
+        $result = $stmt->execute([
+            ':title' => $title,
+            ':content' => $content,
+            ':author_id' => $author_id,
+            ':blog_id' => $blog_id
+        ]);
+        return $result;
+    }
+
     public function fetchSingleBlog($blog_id) {
         $stmt = $this->conn->prepare("SELECT * FROM blogs WHERE blog_id = :blog_id");
         $stmt->bindParam(":blog_id", $blog_id, PDO::PARAM_INT);

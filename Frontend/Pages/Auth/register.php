@@ -40,7 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
         $_SESSION['user'] = $json_response['user'];
-        $_SESSION['session_id'] = $json_response['session_id'];
+        if (isset($_SESSION['user']['user_id'])) {
+            $_SESSION['user_id'] = $_SESSION['user']['user_id'];
+        }
+        $_SESSION['session_id'] = session_id(); 
+        $_SESSION['user_id'] = $json_response['user']['user_id'];  
+
 
         header('Location: /blog-app/frontend/Pages/Auth/success_login.php');
         exit();

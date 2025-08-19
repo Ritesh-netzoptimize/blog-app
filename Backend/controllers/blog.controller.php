@@ -127,6 +127,55 @@ class BlogController {
         ]);
     }
 
+    public function update_blog($blog_id, $data) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $title = trim($data['title']);
+        $content = trim($data['content']);
+        $author_id = trim($data['author_id']) ?? $_SESSION['user_id'] ?? null;
+        if (!$author_id) {
+            $author_id = isset($_COOKIE['user_id']) ? $_COOKIE['user_id'] : null;
+        }
+        if (!$author_id) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'User not authenticated',
+                'status_code' => 403,
+                'author_id' => $author_id,
+            ]);
+        }
+        $user = new User($this->db);
+        $user_data = $user->getById($author_id);
+        if (!$user_data || $user_data['role'] !== 'admin') {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'User is not authorized to update a blog',
+                'status_code' => 403
+            ]);
+        }
+        if (!$blog_id || !$title || !$content) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'Blog ID, title, and content are required',
+                'status_code' => 400
+            ]);
+        }
+        $result = $this->blog->updateBlog($blog_id, $title, $content, $author_id);
+        if ($result) {
+            return $this->sendJson([
+                'success' => true,
+                'message' => 'Blog updated successfully',
+                'status_code' => 200
+            ]);
+        }
+        return $this->sendJson([
+            'success' => false,
+            'message' => 'Blog update failed due to database issue or blog not found',
+            'status_code' => 502
+        ]);
+    }
+
     public function fetch_blog_by_id($blog_id) {
         if (!$blog_id) {
             return $this->sendJson([

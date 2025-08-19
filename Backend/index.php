@@ -48,7 +48,16 @@ switch ($resource) {
             } else {
                 echo json_encode(["success" => false, "message" => "Blog ID is required for deletion"]);
             }
-        }                                                      
+        }   
+        elseif ($action === "update") {
+            $blog_id = $segments[6] ?? null;
+            if ($blog_id && isset($input['title']) && isset($input['content'])) {
+                $blog_controller->update_blog($blog_id, $input);
+            }
+            else {
+                echo json_encode(["success" => false, "message" => "Blog ID, title, and content are required for update"]);
+            }
+        }                                                   
         else echo json_encode(["success" => false, "message" => "Invalid blog action"]);
         break;
 

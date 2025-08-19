@@ -1,0 +1,113 @@
+.page {
+    margin: 0;
+    padding: 0;
+    background: #f6f7f9;
+    color: #2b2b2b;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    max-width: 760px;
+    margin: 48px auto;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    padding: 28px 32px;
+}
+
+.card-title {
+    margin: 0 0 18px 0;
+    font-size: 1.6rem;
+    color: #22313f;
+    letter-spacing: 0.2px;
+}
+
+.message {
+    background: #eef6ff;
+    border-left: 4px solid #2b7de9;
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    font-size: 0.95rem;
+}
+
+.form {
+    display: block;
+}
+
+.field {
+    margin-bottom: 18px;
+}
+
+.label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374957;
+}
+
+.input,
+.textarea {
+    width: 100%;
+    border: 1px solid #d9dee5;
+    border-radius: 8px;
+    padding: 11px 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus {
+    border-color: #2b7de9;
+    box-shadow: 0 0 0 3px rgba(43,125,233,0.12);
+}
+
+.textarea {
+    min-height: 220px;
+    resize: vertical;
+    line-height: 1.55;
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn {
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: #2b7de9;
+    color: #fff;
+    transition: transform 0.05s ease, box-shadow 0.15s ease, background 0.15s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:hover {
+    background: #2369c3;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-secondary {
+    background: #eef1f5;
+    color: #2b2b2b;
+}
+
+.btn-secondary:hover {
+    background: #e5e9f0;
+}
+
