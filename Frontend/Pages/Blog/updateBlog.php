@@ -91,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if (!empty($responseMessage)): ?>
             <div class="message"><?php echo $responseMessage; ?></div>
             <script>
-                // Print the actual error response in the browser console
                 console.error(<?php echo json_encode($responseMessage); ?>);
             </script>
         <?php endif; ?>

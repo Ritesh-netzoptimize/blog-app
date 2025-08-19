@@ -152,8 +152,10 @@ class CommentController {
                     'status_code' => 404
                 ]);
             }
-            if ($comment['user_id'] !== $author_id) {
+            if (($comment['user_id'] !== intval($author_id)) && ($data['role'] !== 'admin')) {
                 return $this->sendJson([
+                    'comment->user_id' => $comment['user_id'],
+                    'author_id' => $author_id,
                     'success' => false,
                     'message' => 'You are not authorized to delete this comment',
                     'status_code' => 403
@@ -165,6 +167,7 @@ class CommentController {
                 return $this->sendJson([
                     'success' => true,
                     'message' => 'Comment deleted successfully',
+                    'blog_id' => $comment['blog_id'] ?? null,
                     'status_code' => 200
                 ]);
             }
@@ -215,8 +218,10 @@ class CommentController {
                     'status_code' => 404
                 ]);
             }
-            if ($existing_comment['user_id'] !== $author_id) {
+            if ($existing_comment['user_id'] !== intval($author_id)) {
                 return $this->sendJson([
+                    'existing_comment->user_id' => $existing_comment['user_id'],
+                    'author_id' => $author_id,
                     'success' => false,
                     'message' => 'You are not authorized to update this comment',
                     'status_code' => 403
@@ -227,6 +232,7 @@ class CommentController {
                 return $this->sendJson([
                     'success' => true,
                     'message' => 'Comment updated successfully',
+                    'blog_id' => $existing_comment['blog_id'] ?? null,
                     'status_code' => 200
                 ]);
             }

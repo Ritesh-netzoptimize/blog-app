@@ -45,11 +45,23 @@ else {
                             <p class="comment-author">Username: <?php echo htmlspecialchars($comment['username']); ?></p>
                             <p class="comment-date">Posted on: <?php echo htmlspecialchars($comment['created_at']); ?></p>
                         </div>
+                        <?php if ($_SESSION['user']['role'] === 'admin'): ?>
+                            <div>
+                                <div class="comment-actions">
+                                <a href="/blog-app/frontend/Pages/Comment/delete.php?id=<?php echo $comment['comment_id'] ?>"><div>Delete</div></a>
+                            </div>
+                        <?php endif; ?>
                         <?php if ($_SESSION['user']['username'] === $comment['username']): ?>
                             <div>
                                 <div class="comment-actions">
-                                <div>Delete</div>
-                                <div>Edit</div>
+                                <a href="/blog-app/Frontend/Pages/Comment/update.php?id=<?php echo $comment['comment_id'] ?>"><div>Edit</div></a>
+                            </div>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (($_SESSION['user']['role'] !== 'admin') && ($_SESSION['user']['username'] === $comment['username'])): ?>
+                            <div>
+                                <div class="comment-actions">
+                                <a href="/blog-app/frontend/Pages/Comment/delete.php?id=<?php echo $comment['comment_id'] ?>"><div>Delete</div></a>
                             </div>
                             </div>
                         <?php endif; ?>
