@@ -108,6 +108,14 @@ switch ($resource) {
                 echo json_encode(["success" => false, "message" => "Comment ID is required for deletion"]);
             }
         }
+        else if($action === "delete") {
+            $category_id = $segments[6] ?? null;
+            if ($category_id) {
+                $category_controller->delete_category($category_id, $input);
+            } else {
+                echo json_encode(["success" => false, "message" => "Comment ID is required for deletion"]);
+            }
+        }
 
     default:
         http_response_code(404);

@@ -24,21 +24,21 @@ class Category {
         return false;
     }
 
-    // public function delete($blog_id) {
+    public function delete($category_id) {
 
-    //     $stmt = $this->conn->prepare(
-    //         "SELECT blog_id FROM blogs WHERE blog_id = :blog_id"
-    //     );
-    //     $stmt->execute([':blog_id' => $blog_id]);
-    //     if ($stmt->rowCount() === 0) {
-    //         return false;
-    //     }
-    //     $stmt = $this->conn->prepare(
-    //         "DELETE FROM blogs WHERE blog_id = :blog_id"
-    //     );
-    //     $result = $stmt->execute([':blog_id' => $blog_id]);
-    //     return $result;
-    // }
+        $stmt = $this->conn->prepare(
+            "SELECT category_id FROM categories WHERE category_id = :category_id"
+        );
+        $stmt->execute([':category_id' => $category_id]);
+        if ($stmt->rowCount() === 0) {
+            return false;
+        }
+        $stmt = $this->conn->prepare(
+            "DELETE FROM categories WHERE category_id = :category_id"
+        );
+        $result = $stmt->execute([':category_id' => $category_id]);
+        return $result;
+    }
 
     public function fetchAllCategories() {
         $stmt = $this->conn->prepare("SELECT * FROM categories ORDER BY created_at DESC");

@@ -16,60 +16,60 @@ class CategoryController {
     }
 
     public function create_category($data) {
-    try {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
 
-        $name = trim($data['name'] ?? '');
-        $parent_id = $data['parent_id'] ?? null;
+            $name = trim($data['name'] ?? '');
+            $parent_id = $data['parent_id'] ?? null;
 
-        $user_role = $data['user_role'] 
-            ?? ($_SESSION['user_role'] ?? ($_SESSION['user']['user_role'] ?? null));
+            $user_role = $data['user_role'] 
+                ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? null));
 
-        if (!$user_role || $user_role !== 'admin') {
-            return $this->sendJson([
-                'success' => false,
-                'message' => 'Unauthorized: Only admins can create categories',
-                'status_code' => 403
-            ]);
-        }
-
-        if (!$name) {
-            return $this->sendJson([
-                'success' => false,
-                'message' => 'Category name is required',
-                'status_code' => 400
-            ]);
-        }
-
-        if ($parent_id !== null) {
-            $parentCategory = $this->category->findCategoryById($parent_id);
-            if (!$parentCategory) {
+            if (!$user_role || $user_role !== 'admin') {
                 return $this->sendJson([
                     'success' => false,
-                    'message' => 'Invalid parent_id: Parent category does not exist',
+                    'message' => 'Unauthorized: Only admins can create categories',
+                    'status_code' => 403
+                ]);
+            }
+
+            if (!$name) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Category name is required',
                     'status_code' => 400
                 ]);
             }
+
+            if ($parent_id !== null) {
+                $parentCategory = $this->category->findCategoryById($parent_id);
+                if (!$parentCategory) {
+                    return $this->sendJson([
+                        'success' => false,
+                        'message' => 'Invalid parent_id: Parent category does not exist',
+                        'status_code' => 400
+                    ]);
+                }
+            }
+
+            $category_id = $this->category->create($name, $parent_id);
+
+            return $this->sendJson([
+                'success' => true,
+                'message' => 'Category created successfully',
+                'category_id' => $category_id,
+                'status_code' => 201
+            ]);
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
         }
-
-        $category_id = $this->category->create($name, $parent_id);
-
-        return $this->sendJson([
-            'success' => true,
-            'message' => 'Category created successfully',
-            'category_id' => $category_id,
-            'status_code' => 201
-        ]);
-    } catch (\Throwable $th) {
-        return $this->sendJson([
-            'success' => false,
-            'message' => 'An error occurred: ' . $th->getMessage(),
-            'status_code' => 500
-        ]);
     }
-}
 
 
     public function assign_category_to_blog($data) {
@@ -179,11 +179,71 @@ class CategoryController {
 
     public function delete_category($category_id, $data) {
         try {
-           
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            if (!isset($_SESSION['user']) && empty($data['user_role'])) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'You must be logged in to delete a category',
+                    'status_code' => 401
+                ]);
+            }
+
+            $user_role = $data['user_role'] 
+                ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? null));
+
+            if (!$user_role || $user_role !== 'admin') {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Unauthorized: Only admins can delete categories',
+                    'status_code' => 403
+                ]);
+            }
+
+            if (!$category_id || !is_numeric($category_id)) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Invalid category_id',
+                    'status_code' => 400
+                ]);
+            }
+
+            $category = $this->category->findCategoryById($category_id);
+            if (!$category) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Category not found',
+                    'status_code' => 404
+                ]);
+            }
+
+            $deleted = $this->category->delete($category_id);
+
+            if ($deleted) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'Category deleted successfully',
+                    'status_code' => 200
+                ]);
+            } else {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Category deletion failed',
+                    'status_code' => 500
+                ]);
+            }
+
         } catch (\Throwable $th) {
-            
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
         }
     }
+
 
     // public function update_category($blog_id, $data) {
     //     try {
