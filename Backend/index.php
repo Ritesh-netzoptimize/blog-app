@@ -5,11 +5,13 @@ require_once(__DIR__ . '/config/db.php');
 require_once(__DIR__ . '/controllers/auth.controller.php');
 require_once(__DIR__ . '/controllers/blog.controller.php');
 require_once(__DIR__ . '/controllers/comment.controller.php');
+require_once(__DIR__ . '/controllers/category.controller.php');
 
 $db = (new Database())->getConnection();
 $auth_controller = new AuthController($db);
 $blog_controller = new BlogController($db);
 $comment_controller = new CommentController($db);
+$category_controller = new CategoryController($db);
 
 $input = json_decode(file_get_contents("php://input"), true);
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
@@ -94,6 +96,18 @@ switch ($resource) {
         }
         else echo json_encode(["success" => false, "message" => "Invalid comment action"]);
         break;
+
+    case 'category':
+        if($action === "create") $category_controller->create_category($input);
+        else if($action === "fetch-all") $category_controller->fetch_categories();
+        else if($action === "fetch-by-id") {
+            $category_id = $segments[6] ?? null;
+            if ($category_id) {
+                $category_controller->fetch_catogory_by_id($category_id);
+            } else {
+                echo json_encode(["success" => false, "message" => "Comment ID is required for deletion"]);
+            }
+        }
 
     default:
         http_response_code(404);
