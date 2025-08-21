@@ -151,6 +151,7 @@ switch ($resource) {
             }
         }
         else echo json_encode(["success" => false, "message" => "Invalid comment action"]);
+        break;
     default:
         http_response_code(404);
         echo json_encode(["success" => false, "message" => "Unknown resource"]);

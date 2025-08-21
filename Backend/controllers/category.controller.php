@@ -92,7 +92,7 @@ class CategoryController {
                     'status_code' => 403
                 ]);
             }
-            echo json_encode(["blog_id" => $blog_id, "category_id" => $category_id]);
+            // echo json_encode(["blog_id" => $blog_id, "category_id" => $category_id]);
             if (!$blog_id || !$category_id) {
                 return $this->sendJson([
                     'success' => false,

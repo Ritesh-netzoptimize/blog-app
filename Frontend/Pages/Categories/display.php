@@ -42,7 +42,7 @@ $categoryTree = buildTree($categories);
         function toggleSubcategories(id) {
             const subList = document.getElementById("sub-" + id);
             if (subList) {
-                subList.classList.toggle("show");
+                subList.style.display = (subList.style.display === "none") ? "block" : "none";
             }
         }
     </script>
@@ -57,12 +57,17 @@ $categoryTree = buildTree($categories);
                 function renderCategories($categories) {
                     foreach ($categories as $cat) {
                         echo '<li class="category-item">';
-                        echo '<span class="category-name" onclick="toggleSubcategories('.$cat['category_id'].')">'.$cat['name'].'</span>';
                         if (isset($cat['children'])) {
-                            echo '<ul class="subcategory-list" id="sub-'.$cat['category_id'].'">';
+                            echo '<span class="caret" onclick="toggleSubcategories('.$cat['category_id'].')">▶</span>';
+                        }
+                        echo '<a class="category-name" href="/blog-app/frontend/Pages/categories/subcategories/displayAssociatedBlogs.php?id='.$cat['category_id'].'">'
+                            .htmlspecialchars($cat['name']).'</a>';
+                        if (isset($cat['children'])) {
+                            echo '<ul class="subcategory-list" id="sub-'.$cat['category_id'].'" style="display:none;">';
                             renderCategories($cat['children']);
                             echo '</ul>';
                         }
+
                         echo '</li>';
                     }
                 }
