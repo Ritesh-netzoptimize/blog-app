@@ -105,7 +105,7 @@ switch ($resource) {
             if ($category_id) {
                 $category_controller->fetch_catogory_by_id($category_id);
             } else {
-                echo json_encode(["success" => false, "message" => "Comment ID is required for deletion"]);
+                echo json_encode(["success" => false, "message" => "Comment ID is required for creation"]);
             }
         }
         else if($action === "delete") {
@@ -114,6 +114,14 @@ switch ($resource) {
                 $category_controller->delete_category($category_id, $input);
             } else {
                 echo json_encode(["success" => false, "message" => "Comment ID is required for deletion"]);
+            }
+        }
+        else if($action === "assign-category") {
+            $category_id = $segments[6] ?? null;
+            if ($category_id) {
+                $category_controller->assign_category_to_blog($category_id, $input);
+            } else {
+                echo json_encode(["success" => false, "message" => "Comment ID is required for assignment"]);
             }
         }
 

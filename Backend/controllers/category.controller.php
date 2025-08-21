@@ -8,11 +8,13 @@ class CategoryController {
     private $db;
     private $category;
     private $blogCategory;
+    private $blog;
 
     public function __construct($db) {
         $this->db = $db;
         $this->category = new Category($db); 
         $this->blogCategory = new BlogCategory($db);
+        $this->blog = new Blog($db);
     }
 
     public function create_category($data) {
@@ -72,7 +74,7 @@ class CategoryController {
     }
 
 
-    public function assign_category_to_blog($data) {
+    public function assign_category_to_blog($category_id, $data) {
         try {
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
@@ -80,18 +82,17 @@ class CategoryController {
 
             $blog_id = $data['blog_id'] ?? null;
             $category_id = $data['category_id'] ?? null;
-
+            
             $user_role = $data['user_role'] 
-                ?? ($_SESSION['user_role'] ?? ($_SESSION['user']['user_role'] ?? null));
-
-            if (!$user_role || $user_role !== 'admin') {
-                return $this->sendJson([
+                ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? null));
+                if (!$user_role || $user_role !== 'admin') {
+                    return $this->sendJson([
                     'success' => false,
                     'message' => 'Unauthorized: Only admins can assign categories to blogs',
                     'status_code' => 403
                 ]);
             }
-
+            echo json_encode(["blog_id" => $blog_id, "category_id" => $category_id]);
             if (!$blog_id || !$category_id) {
                 return $this->sendJson([
                     'success' => false,
@@ -100,7 +101,7 @@ class CategoryController {
                 ]);
             }
 
-            $blog = $this->blog->getById($blog_id);
+            $blog = $this->blog->fetchSingleBlog($blog_id);
             if (!$blog) {
                 return $this->sendJson([
                     'success' => false,
