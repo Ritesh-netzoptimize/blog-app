@@ -85,6 +85,17 @@ if ($result) {
     <div class="blogs-container">
         <a href="/blog-app/frontend/Pages/categories/display.php">Back to Categories</a>
         <h1>Blogs in this Category</h1>
+        <?php if ($is_admin): ?>
+            <div class="form-container">
+                <h2>Create Subcategory</h2>
+                <div id="form-message"></div>
+                <form id="subcategoryForm">
+                    <input type="text" name="name" id="name" placeholder="Enter Subcategory Name" required>
+                    <input type="hidden" name="parent_id" id="parent_id" value="<?php echo $category_id; ?>">
+                    <button type="submit">Create</button>
+                </form>
+            </div>
+        <?php endif; ?>
         
         <?php if ($responseMessage): ?>
             <div class="response-message"><?php echo htmlspecialchars($responseMessage); ?></div>
@@ -117,17 +128,7 @@ if ($result) {
             <p>No blogs available for this category.</p>
         <?php endif; ?>
 
-        <?php if ($is_admin): ?>
-            <div class="form-container">
-                <h2>Create Subcategory</h2>
-                <div id="form-message"></div>
-                <form id="subcategoryForm">
-                    <input type="text" name="name" id="name" placeholder="Enter Subcategory Name" required>
-                    <input type="hidden" name="parent_id" id="parent_id" value="<?php echo $category_id; ?>">
-                    <button type="submit">Create</button>
-                </form>
-            </div>
-        <?php endif; ?>
+        
     </div>
 
     <script>

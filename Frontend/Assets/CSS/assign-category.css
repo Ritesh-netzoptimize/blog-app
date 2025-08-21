@@ -1,0 +1,35 @@
+.assign-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+            max-width: 400px;
+        }
+        .assign-container h3 {
+            margin-bottom: 10px;
+        }
+        select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button.assign-btn {
+            padding: 8px 12px;
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button.assign-btn:hover {
+            background: #1557b0;
+        }
+        .selected-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #333;
+            font-weight: bold;
+        }
