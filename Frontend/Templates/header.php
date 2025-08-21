@@ -19,7 +19,7 @@ $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
         <div class="logo">LOGO</div>
         <nav class="nav-links">
             <a href="/blog-app/frontend/index.php">Home</a>
-            <a href="">Blogs</a>
+            <a href="/blog-app/frontend/pages/categories/display.php">Blogs</a>
         </nav>
         <div class="auth-links">
             <?php if ($is_loggedIn): ?>

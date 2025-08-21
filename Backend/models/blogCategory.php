@@ -23,5 +23,13 @@ class BlogCategory {
         }
         return false;
     }
+
+    public function fetchAssociatedBlogsFromCategoryId($category_id) {
+        $stmt = $this->conn->prepare("SELECT b.* FROM blogs b JOIN blog_categories bc ON b.blog_id = bc.blog_id WHERE bc.category_id = :category_id");
+        $stmt->execute([
+            ':category_id' => $category_id,
+        ]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 ?>

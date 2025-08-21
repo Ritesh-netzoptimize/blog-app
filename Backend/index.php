@@ -26,7 +26,7 @@ if (count($segments) < 4 || $segments[2] !== "api" || $segments[3] !== "v1") {
 }
 $resource = $segments[4];
 $action = $segments[5] ?? null;
-
+// echo json_encode(["resource" => $resource]);
 switch ($resource) {
     case 'auth':
         if ($action === "register") $auth_controller->register($input);
@@ -136,7 +136,21 @@ switch ($resource) {
                 echo json_encode(["success" => false, "message" => "Comment ID is required for updation"]);
             }
         }
+        else if($action === "fetch-all-blogs") {
+            $category_id = $segments[6] ?? null;
+            // echo json_encode(["category_id" => $category_id]);
+            // echo json_encode(["action" => $action]);
+            
+            if ($category_id) {
+                // echo json_encode(["action" => $action]);
+            // echo json_encode(["category_id" => $category_id]);
 
+                $category_controller->fetch_associated_blogs_from_category_id($category_id);
+            } else {
+                echo json_encode(["success" => false, "message" => "Comment ID is required for updation"]);
+            }
+        }
+        else echo json_encode(["success" => false, "message" => "Invalid comment action"]);
     default:
         http_response_code(404);
         echo json_encode(["success" => false, "message" => "Unknown resource"]);

@@ -276,7 +276,7 @@ class CategoryController {
             
             $category = $this->category->findCategoryById($category_id);
             // echo json_encode(["category_id" => $category_id]);
-            // echo json_encode(["category" => $category]);
+            // echo json_encode(["category" => $category]); -> true/false
 
             if (!$category) {
                 return $this->sendJson([
@@ -307,6 +307,42 @@ class CategoryController {
         }
     }
     
+    public function fetch_associated_blogs_from_category_id($category_id) {
+            // $category = $this->category->findCategoryById($category_id); gives true/false
+         try {
+            // echo json_encode(["inside fetch_associated_blogs_from_category_id" => $category_id]);
+
+            $category = $this->category->findCategoryById($category_id);
+            if (!$category) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Category not found',
+                    'status_code' => 404
+                ]);
+            }
+            // echo json_encode(["afer getting category" => $category]);
+            
+            $all_blogs = $this->blogCategory->fetchAssociatedBlogsFromCategoryId($category_id);
+            // echo json_encode(["all blogs" => $all_blogs]);
+
+            if ($all_blogs) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'blogs fetched successfully',
+                    'status_code' => 200,
+                    'all_blogs' => $all_blogs
+                ]);
+            }
+
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
+
     private function sendJson($data) {
         header('Content-Type: application/json');
         echo json_encode($data) . "\n";
