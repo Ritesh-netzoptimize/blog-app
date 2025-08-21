@@ -246,13 +246,66 @@ class CategoryController {
     }
 
 
-    // public function update_category($blog_id, $data) {
-    //     try {
+    public function update_category($category_id, $data) {
+        try {
+            // echo json_encode(["category_id" => $category_id]);
+
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $name = trim($data['name']);
            
-    //     } catch (\Throwable $th) {
+            $user_role = $data['user_role'] 
+                ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? null));
+
+            if (!$user_role || $user_role !== 'admin') {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Unauthorized: Only admins can update categories',
+                    'status_code' => 403
+                ]);
+            }
+
+            if (!$category_id || !is_numeric($category_id)) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Invalid category_id',
+                    'status_code' => 400
+                ]);
+            }
             
-    //     }
-    // }
+            $category = $this->category->findCategoryById($category_id);
+            // echo json_encode(["category_id" => $category_id]);
+            // echo json_encode(["category" => $category]);
+
+            if (!$category) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Category not found',
+                    'status_code' => 404
+                ]);
+            }
+            $category = $this->category->updateCategory($category_id, $name);
+            if ($category) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'category updated successfully',
+                    'status_code' => 200,
+                ]);
+            }
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'category update failed due to database issue or blog not found',
+                'status_code' => 502
+            ]);
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
     
     private function sendJson($data) {
         header('Content-Type: application/json');

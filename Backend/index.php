@@ -124,6 +124,18 @@ switch ($resource) {
                 echo json_encode(["success" => false, "message" => "Comment ID is required for assignment"]);
             }
         }
+        else if($action === "update") {
+            $category_id = $segments[6] ?? null;
+            // echo json_encode(["category_id" => $category_id]);
+
+            if ($category_id) {
+            // echo json_encode(["category_id" => $category_id]);
+
+                $category_controller->update_category($category_id, $input);
+            } else {
+                echo json_encode(["success" => false, "message" => "Comment ID is required for updation"]);
+            }
+        }
 
     default:
         http_response_code(404);

@@ -61,17 +61,15 @@ class Category {
         return false;
     }
 
-    // public function updateCategory($blog_id, $title, $content, $author_id) {
-    //     $stmt = $this->conn->prepare(
-    //         "UPDATE blogs SET title = :title, content = :content, author_id = :author_id WHERE blog_id = :blog_id"
-    //     );
-    //     $result = $stmt->execute([
-    //         ':title' => $title,
-    //         ':content' => $content,
-    //         ':author_id' => $author_id,
-    //         ':blog_id' => $blog_id
-    //     ]);
-    //     return $result;
-    // }
+    public function updateCategory($category_id, $name) {
+        $stmt = $this->conn->prepare(
+            "UPDATE categories SET name = :name WHERE category_id = :category_id"
+        );
+        $result = $stmt->execute([
+            ':name' => $name,
+            ':category_id' => $category_id
+        ]);
+        return $result;
+    }
 }
 ?>
