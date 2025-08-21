@@ -45,11 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cleanResult = preg_replace('/^[^{]+/', '', $result);
         $json_response = json_decode($cleanResult, true);
         if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
-            header("Location: /blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=$blogId");
-            exit();
-        }
-        else {
-            $responseMessage = "Failed to add comment. Raw response: " . htmlspecialchars($result);
+            echo json_encode([
+            "success" => true,
+            "message" => "Comment added successfully!"
+        ]);
+        exit;
+        } else {
+            echo json_encode([
+                "success" => false,
+                "message" => "Failed to add comment.",
+                "raw" => $result
+            ]);
+            exit;
         }
     } else {
         $responseMessage = "comment and Author ID are required.";
@@ -81,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="message"><?php echo $responseMessage; ?></div>
         <?php endif; ?>
 
-        <form method="POST" action="">
+        <form id="commentForm" method="POST" action="">
             <input type="text" name="comment" id="comment" required>
 
             <input type="hidden" name="author_id" value="<?php echo htmlspecialchars($author_id); ?>">
@@ -90,4 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
 </body>
+<script>
+    if (data.success) {
+    document.getElementById("formMessage").innerHTML = "<p style='color:green;'>Comment added successfully!</p>";
+    document.getElementById("commentForm").reset();
+
+} else {
+    document.getElementById("formMessage").innerHTML = "<p style='color:red;'>" + data.message + "</p>";
+}
+</script>
 </html>

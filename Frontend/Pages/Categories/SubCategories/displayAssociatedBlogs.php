@@ -41,7 +41,7 @@ if ($result) {
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/blogs.css">
     <style>
         .form-container {
-            margin-top: 20px;
+            margin-bottom: 20px;
             background: #fff;
             padding: 15px;
             border-radius: 8px;

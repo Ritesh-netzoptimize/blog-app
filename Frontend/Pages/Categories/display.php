@@ -47,7 +47,7 @@ $categoryTree = buildTree($categories);
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/display-categories.css">
     <style>
         .form-container {
-            margin-top: 20px;
+            margin-bottom: 20px;
             background: #fff;
             padding: 15px;
             border-radius: 8px;
@@ -98,12 +98,24 @@ $categoryTree = buildTree($categories);
     <?php include "../../templates/header.php" ?>
     <div class="category-container">
         <h1>All Categories</h1>
+        <?php if ($is_admin): ?>
+                <div class="form-container">
+                    <h2>Create category</h2>
+                    <div id="form-message"></div>
+                    <form id="topCategoryForm">
+                        <input type="text" name="name" id="name" placeholder="Enter Category Name" required>
+                        <input type="hidden" name="parent_id" id="parent_id" value="">
+                        <button type="submit">Create</button>
+                    </form>
+                </div>
+            <?php endif; ?>
         <?php if (!empty($categoryTree)): ?>
             <ul class="category-list">
                 <?php
                 function renderCategories($categories) {
                     foreach ($categories as $cat) {
                         echo '<li class="category-item">';
+
                         if (isset($cat['children'])) {
                             echo '<span class="caret" onclick="toggleSubcategories('.$cat['category_id'].')">▶</span>';
                         }
@@ -124,17 +136,7 @@ $categoryTree = buildTree($categories);
             <p>No categories available.</p>
         <?php endif; ?>
 
-        <?php if ($is_admin): ?>
-            <div class="form-container">
-                <h2>Create category</h2>
-                <div id="form-message"></div>
-                <form id="topCategoryForm">
-                    <input type="text" name="name" id="name" placeholder="Enter Category Name" required>
-                    <input type="hidden" name="parent_id" id="parent_id" value="">
-                    <button type="submit">Create</button>
-                </form>
-            </div>
-        <?php endif; ?>
+        
     </div>
 
     <script>

@@ -63,3 +63,58 @@ body {
             border-left: 4px solid #2980b9;
             color: #333;
         }
+
+        .comment-item {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.comment-actions {
+    margin-top: 5px;
+}
+
+.reply-toggle-btn {
+    font-size: 12px;
+    padding: 3px 6px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.reply-section {
+    margin-left: 30px; /* indentation */
+    margin-top: 10px;
+    padding-left: 15px;
+    border-left: 2px solid #ccc;
+    max-width: 80%;
+}
+
+.reply-item {
+    background: #f9f9f9;
+    padding: 6px;
+    margin: 5px 0;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.reply-form {
+    margin-top: 10px;
+}
+
+.reply-form input {
+    width: 70%;
+    padding: 6px;
+    font-size: 14px;
+}
+
+.reply-form button {
+    padding: 6px 10px;
+    font-size: 14px;
+    background: #1a73e8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+}
+.reply-form button:hover {
+    background: #1557b0;
+}
