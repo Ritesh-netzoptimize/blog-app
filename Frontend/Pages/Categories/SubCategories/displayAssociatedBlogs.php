@@ -11,7 +11,7 @@ $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
 if (!isset($_GET['id'])) {
     die("Category ID is missing.");
 }
-$category_id = intval($_GET['id']);
+$category_id = intval($_GET['id']); 
 
 $URL = "http://localhost/blog-app/backend/api/v1/category/fetch-all-blogs/" . $category_id;
 $ch = curl_init($URL);
@@ -32,7 +32,6 @@ if ($result) {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,6 +39,46 @@ if ($result) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blogs by Category</title>
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/blogs.css">
+    <style>
+        .form-container {
+            margin-top: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+        .form-container h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .form-container input {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .form-container button {
+            padding: 8px 12px;
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background: #1557b0;
+        }
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+        .success-message {
+            color: green;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <?php include_once '../../../Templates/header.php'; ?>
@@ -77,6 +116,63 @@ if ($result) {
         <?php else: ?>
             <p>No blogs available for this category.</p>
         <?php endif; ?>
+
+        <?php if ($is_admin): ?>
+            <div class="form-container">
+                <h2>Create Subcategory</h2>
+                <div id="form-message"></div>
+                <form id="subcategoryForm">
+                    <input type="text" name="name" id="name" placeholder="Enter Subcategory Name" required>
+                    <input type="hidden" name="parent_id" id="parent_id" value="<?php echo $category_id; ?>">
+                    <button type="submit">Create</button>
+                </form>
+            </div>
+        <?php endif; ?>
     </div>
+
+    <script>
+        const form = document.getElementById("subcategoryForm");
+        const formMessage = document.getElementById("form-message");
+
+        if (form) {
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const name = document.getElementById("name").value.trim();
+                const parent_id = document.getElementById("parent_id").value;
+
+                if (!name) {
+                    formMessage.innerHTML = "<p class='error-message'>Category name is required.</p>";
+                    return;
+                }
+
+                const payload = {
+                    name: name,
+                    user_role: "admin",
+                    parent_id: parent_id
+                };
+
+                try {
+                    const response = await fetch("http://localhost/blog-app/backend/api/v1/category/create", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        formMessage.innerHTML = "<p class='success-message'>" + data.message + "</p>";
+                        form.reset();
+                    } else {
+                        formMessage.innerHTML = "<p class='error-message'>" + data.message + "</p>";
+                    }
+                } catch (error) {
+                    formMessage.innerHTML = "<p class='error-message'>Something went wrong. Try again.</p>";
+                }
+            });
+        }
+    </script>
 </body>
 </html>
