@@ -43,19 +43,23 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
     <div class="blog-content" style="position: relative;">
     <!-- Like Button -->
     <div class="like-container">
-        <?php if ($is_loggedIn): ?>
-            <button 
-                id="likeBtn" 
-                class="like-btn unliked" 
-                data-blogid="<?php echo $blogId; ?>" 
-                data-authorid="<?php echo $author_id; ?>">
-                ♥
+    <?php if ($is_loggedIn): ?>
+        <button 
+            id="likeBtn" 
+            class="like-btn unliked" 
+            data-blogid="<?php echo $blogId; ?>" 
+            data-authorid="<?php echo $_SESSION['user']['user_id']; ?>">
+            ♥
         </button>
-        <?php else: ?>
-            <span style="color:#aaa; font-size:22px;">♥</span>
-        <?php endif; ?>
-        <span id="likeCount" class="like-count">0</span>
-    </div>
+    <?php else: ?>
+        <!-- Show heart but not clickable -->
+        <span id="likeBtn" class="like-btn disabled-heart">♥</span>
+    <?php endif; ?>
+
+    <!-- Always show like count -->
+    <span id="likeCount" class="like-count">0</span>
+</div>
+
 
     <h1 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h1>
     <p class="blog-text"><?php echo htmlspecialchars($blog['content']); ?></p>
@@ -69,46 +73,47 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
 
 
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const likeBtn = document.getElementById("likeBtn");
-        const likeCount = document.getElementById("likeCount");
-        const blogId = likeBtn ? likeBtn.dataset.blogid : null;
-        const authorId = likeBtn ? likeBtn.dataset.authorid : null;
+    document.addEventListener("DOMContentLoaded", async function () {
+    const blogId = "<?php echo $blogId; ?>";
+    const likeCountEl = document.getElementById("likeCount");
+    const likeBtn = document.getElementById("likeBtn");
 
-        // Fetch total likes count initially
-        fetch(`http://localhost/blog-app/backend/api/v1/blog/likes-count/${blogId}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    likeCount.textContent = data.Likes_count;
-                }
-            });
+    // Fetch like count
+    const res = await fetch(`http://localhost/blog-app/backend/api/v1/blog/likes-count/${blogId}`);
+    const data = await res.json();
+    if (data.success) {
+        likeCountEl.innerText = data.Likes_count;
+    }
 
-        if (likeBtn) {
-            likeBtn.addEventListener("click", () => {
-                fetch(`http://localhost/blog-app/backend/api/v1/blog/like/${blogId}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ author_id: authorId })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const likedStatus = data.liked_result.status;
-                        likeCount.textContent = data.liked_result.totalLikes;
+    // If user is logged in, enable toggle
+    <?php if ($is_loggedIn): ?>
+    likeBtn.addEventListener("click", async function () {
+        const authorId = this.dataset.authorid;
 
-                        if (likedStatus === "liked") {
-                            likeBtn.classList.remove("unliked");
-                            likeBtn.classList.add("liked");
-                        } else {
-                            likeBtn.classList.remove("liked");
-                            likeBtn.classList.add("unliked");
-                        }
-                    }
-                });
-            });
+        const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/like/${blogId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ author_id: authorId })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            const likedResult = result.liked_result;
+            likeCountEl.innerText = likedResult.totalLikes;
+
+            if (likedResult.status === "liked") {
+                likeBtn.classList.remove("unliked");
+                likeBtn.classList.add("liked");
+            } else {
+                likeBtn.classList.remove("liked");
+                likeBtn.classList.add("unliked");
+            }
         }
     });
+    <?php endif; ?>
+});
+</script>
+
     </script>
 </body>
 </html>

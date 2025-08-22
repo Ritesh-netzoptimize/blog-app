@@ -54,29 +54,35 @@
 }
 
 .like-container {
-    position: absolute;
-    top: 15px;
-    right: 15px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: #fff;
-    padding: 6px 10px;
-    border-radius: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 .like-btn {
-    font-size: 25px !important;
-    cursor: pointer !important;
+    font-size: 22px;
     border: none;
     background: none;
+    cursor: pointer;
+    color: #e74c3c; /* red heart */
     transition: transform 0.2s ease;
 }
 
 .like-btn:hover {
     transform: scale(1.2);
 }
+
+.like-btn.unliked {
+    color: #aaa; /* grey when not liked */
+}
+
+.disabled-heart {
+    font-size: 22px;
+    color: #aaa;
+    cursor: default;
+}
+
 
 .liked {
     color: #e63946; /* red */
