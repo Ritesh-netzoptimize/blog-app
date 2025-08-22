@@ -81,17 +81,7 @@ class CategoryController {
             }
 
             $blog_id = $data['blog_id'] ?? null;
-            $category_id = $data['category_id'] ?? null;
             
-            $user_role = $data['user_role'] 
-                ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? null));
-                if (!$user_role || $user_role !== 'admin') {
-                    return $this->sendJson([
-                    'success' => false,
-                    'message' => 'Unauthorized: Only admins can assign categories to blogs',
-                    'status_code' => 403
-                ]);
-            }
             // echo json_encode(["blog_id" => $blog_id, "category_id" => $category_id]);
             if (!$blog_id || !$category_id) {
                 return $this->sendJson([

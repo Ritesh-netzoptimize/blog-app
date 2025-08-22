@@ -19,9 +19,9 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 $result = curl_exec($ch);
 curl_close($ch);
-
+$one_approved = 0;
 $clean_result = preg_replace('/^[^{]+/', '', $result);
-
+$json_response = json_decode($clean_result, true);
 $blogs = [];
 if ($result) {
     $data = json_decode($clean_result, true);
@@ -108,7 +108,8 @@ if ($result) {
         <?php if (!empty($blogs)): ?>
             <ul class="blogs-list">
                 <?php foreach ($blogs as $blog): ?>
-                    <li class="blog-item">
+                    <?php if($blog['approved']): ?>
+                        <li class="blog-item">
                         <div class="blog-actions">
                             <?php if ($is_loggedIn): ?>
                                 <?php if ($is_admin): ?>
@@ -126,6 +127,7 @@ if ($result) {
                         <p class="blog-author">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
                         <p class="blog-date">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
                     </li>
+                    <?php endif ?>
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>

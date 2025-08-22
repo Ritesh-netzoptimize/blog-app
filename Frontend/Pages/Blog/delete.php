@@ -36,7 +36,7 @@ $json_response = json_decode($cleanResult, true);
 var_dump($json_response);
 if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
     echo "Blog deleted successfully!";
-    header("Location: /blog-app/frontend/Pages/adminDashboard.php");
+    header("Location: /blog-app/frontend/index.php");
     exit;
 } else {
     die("Failed to delete blog. Response: " . htmlspecialchars($result));

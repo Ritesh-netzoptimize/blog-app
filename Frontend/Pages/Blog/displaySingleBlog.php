@@ -25,21 +25,6 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
     die("Failed to fetch blog. Raw response: " . htmlspecialchars($result));
 }
 
-$categoriesURL = "http://localhost/blog-app/backend/api/v1/category/fetch-all";
-$ch = curl_init($categoriesURL);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-$catResult = curl_exec($ch);
-curl_close($ch);
-
-$categories = [];
-if ($catResult) {
-    $catData = json_decode($catResult, true);
-    if ($catData && $catData['success'] === true) {
-        $categories = $catData['categories'];
-    }
-}
-
 $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
 $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
 ?>
@@ -98,75 +83,10 @@ $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
         <p class="blog-meta">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
         <a class="back-link" href="/blog-app/frontend/index.php">Back to all blogs</a>
 
-        <?php if ($is_admin): ?>
-            <div class="assign-container">
-                <h3>Assign Category</h3>
-                <select id="categorySelect">
-                    <option value="">-- Select Category --</option>
-                    <?php foreach ($categories as $cat): ?>
-                        <option value="<?php echo $cat['category_id']; ?>">
-                            <?php echo htmlspecialchars($cat['name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <div id="selectedCategory" class="selected-info"></div>
-                <button class="assign-btn" id="assignBtn">Assign Category</button>
-                <div id="assignMessage"></div>
-            </div>
-        <?php endif; ?>
-
         <?php include_once '../Comment/create.php'; ?>
         <?php include_once '../Comment/display.php'; ?>
     </div>
 
-    <script>
-        const categorySelect = document.getElementById("categorySelect");
-        const selectedCategory = document.getElementById("selectedCategory");
-        const assignBtn = document.getElementById("assignBtn");
-        const assignMessage = document.getElementById("assignMessage");
-        const blogId = <?php echo $blogId; ?>;
-
-        let chosenCategoryId = null;
-
-        categorySelect?.addEventListener("change", function() {
-            chosenCategoryId = this.value;
-            if (chosenCategoryId) {
-                const selectedText = this.options[this.selectedIndex].text;
-                selectedCategory.innerHTML = "Selected: " + selectedText;
-            } else {
-                selectedCategory.innerHTML = "";
-            }
-        });
-
-        assignBtn?.addEventListener("click", async function() {
-            if (!chosenCategoryId) {
-                assignMessage.innerHTML = "<p style='color:red;'>Please select a category first.</p>";
-                return;
-            }
-            const payload = {
-                blog_id: blogId,
-                category_id: chosenCategoryId,
-                user_role: "admin"
-            };
-            try {
-                const response = await fetch(`http://localhost/blog-app/backend/api/v1/category/assign-category/${chosenCategoryId}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    assignMessage.innerHTML = "<p style='color:green;'>" + data.message + "</p>";
-                } else {
-                    assignMessage.innerHTML = "<p style='color:red;'>" + data.message + "</p>";
-                }
-            } catch (error) {
-                assignMessage.innerHTML = "<p style='color:red;'>Something went wrong. Try again.</p>";
-            }
-        });
-    </script>
+    
 </body>
 </html>

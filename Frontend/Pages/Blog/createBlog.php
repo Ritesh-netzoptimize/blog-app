@@ -1,6 +1,25 @@
 <?php
 session_start();
 
+
+$categoriesURL = "http://localhost/blog-app/backend/api/v1/category/fetch-all";
+$ch = curl_init($categoriesURL);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+$catResult = curl_exec($ch);
+curl_close($ch);
+
+$categories = [];
+if ($catResult) {
+    $catData = json_decode($catResult, true);
+    if ($catData && $catData['success'] === true) {
+        $categories = $catData['categories'];
+    }
+}
+
+$is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
+$is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
+
 if (!isset($_SESSION['user'])) {
     die("You must be logged in to create a blog.");
 }
@@ -37,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cleanResult = preg_replace('/^[^{]+/', '', $result);
         $json_response = json_decode($cleanResult, true);
        
-
         if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
             $responseMessage = "Blog created successfully!";
+            header("Location: /blog-app/frontend/pages/categories/assignCategories.php?id=" . $json_response['blog_id']);
         } else {
             $responseMessage = "Failed to create blog. Response: " . ($result);
         }
@@ -52,6 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Create Blog</title>
+    <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/assign-categegory.css">
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -60,10 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin: 0;
             padding: 0;
         }
-    a {
-        text-decoration: none;
-        color: black;
-    }
+
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
         .container {
             max-width: 700px;
             margin: 50px auto;
@@ -130,6 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a  class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
 
         <h1>Create a New Blog</h1>
+        
+            
 
         <?php if (!empty($responseMessage)) : ?>
             <div class="message"><?php echo $responseMessage; ?></div>

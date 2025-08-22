@@ -9,9 +9,16 @@ class Blog {
     }
 
     public function create($title, $content, $author_id) {
-        $stmt = $this->conn->prepare(
+        if ($author_id == 2) {
+            $stmt = $this->conn->prepare(
+            "INSERT INTO blogs (title, content, author_id, approved) VALUES (:title, :content, :author_id, 1)"
+            );
+        }
+        else {
+            $stmt = $this->conn->prepare(
             "INSERT INTO blogs (title, content, author_id) VALUES (:title, :content, :author_id)"
-        );
+            );
+        }
 
         $result = $stmt->execute([
             ':title' => $title,
@@ -50,6 +57,23 @@ class Blog {
         }
         return [];
     }
+
+    // fetch blogs which are not approved of a particular user
+    public function fetchPendingApprovalBlogs($author_id) {
+        $stmt = $this->conn->prepare("SELECT * FROM blogs WHERE author_id = :author_id AND approved = 0 ORDER BY created_at DESC");
+
+        $stmt->bindParam(":author_id", $author_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($blogs) {
+            return $blogs;
+        }
+        return [];
+
+    }
+
 
     public function updateBlog($blog_id, $title, $content, $author_id) {
         $stmt = $this->conn->prepare(

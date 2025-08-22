@@ -101,6 +101,7 @@ class BlogController {
             ]);
         }
     }
+    
 
     public function delete_blog($blog_id, $data) {
         try {
@@ -259,6 +260,55 @@ class BlogController {
         }
     }
 
+    // fetch blogs which are not approved of a particular user
+    public function fetch_pending_approval_blogs_of_particular_user($author_id, $data){
+        try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            if (!$author_id) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Author ID is missing',
+                    'status_code' => 402
+                ]);
+            }
+            $user = new User($this->db);
+            $user_data = $user->getById($data['user_id']);
+            if (!$user_data || $user_data['role'] !== 'admin') {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'User is not authorized to fetch pending approval blogs',
+                    'status_code' => 403
+                ]);
+            }
+
+            $result = $this->blog->fetchPendingApprovalBlogs($author_id);
+            if ($result) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'Pending approval blogs for a particular user fetched successfully',
+                    'status_code' => 200,
+                    'blogs' => $result
+                ]);
+            }
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'Blogs not found',
+                'status_code' => 404,
+                'blogs' => []
+            ]);
+
+
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
+
     public function approve_blog($blog_id, $data) {
         try {
             if (session_status() === PHP_SESSION_NONE) {
@@ -275,7 +325,7 @@ class BlogController {
                 $author_id = isset($_COOKIE['user_id']) ? $_COOKIE['user_id'] : null;
             }
 
-
+            
             if (!$author_id) {
                 return $this->sendJson([
                     'success' => false,
@@ -329,7 +379,7 @@ class BlogController {
             // if (!$author_id) {
             //     $author_id = $_SESSION['user_id'] ?? null;
             // }
-            echo $author_id;
+            // echo $author_id;
             if (!$author_id) {
                 return $this->sendJson([
                     'success' => false,
@@ -338,7 +388,15 @@ class BlogController {
                     'author_id' => $author_id,
                 ]);
             }
-
+            $user = new User($this->db);
+            $user_data = $user->getById($author_id);
+            if (!$user_data || $user_data['role'] !== 'admin') {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'User is not authorized to fetch blogs',
+                    'status_code' => 403
+                ]);
+            }
             $result = $this->blog->fetchBlogsByUserId($author_id);
             if ($result) {
                 return $this->sendJson([

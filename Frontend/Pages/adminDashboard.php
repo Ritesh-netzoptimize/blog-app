@@ -7,6 +7,10 @@ $responseMessage = "";
 $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
 $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
 
+if (!$is_admin) {
+    die("Access Denied: Admins only.");
+}
+
 $URL = 'http://localhost/blog-app/backend/api/v1/blog/fetch-all';
 $ch = curl_init($URL);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -19,65 +23,127 @@ if ($result === false) {
     die("cURL Error: " . curl_error($ch));
 }
 curl_close($ch);
+
 $cleanResult = preg_replace('/^[^{]+/', '', $result);
 $json_response = json_decode($cleanResult, true);
+
 if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
     $blogs = $json_response['blogs'];
+    $pendingBlogs = array_filter($blogs, function($b) {
+        return !$b['approved'];
+        });
 } else {
     $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
+    $blogs = [];
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Blogs</title>
-    <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/blogs.css">
+    <title>Approve Blogs</title>
+    <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/admin-dashboard.css">
+    <style>
+        .approved-label {
+            color: green;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .approve-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .approve-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
-<style>
-    a {
-        text-decoration: none;
-        color: black;   
-    }
-</style>
 <body>
-    <?php include_once '../Templates/header.php'; ?>
+    <?php include_once "../Templates/header.php"?>
     <div class="blogs-container">
-        <a href="/blog-app/frontend/index.php">Back</a>
-        <h1>All Blogs</h1>
+        <h1>Pending Blog Approvals</h1>
+
         <?php if ($responseMessage): ?>
             <div class="response-message"><?php echo $responseMessage; ?></div>
         <?php endif; ?>
 
-        <?php if (isset($blogs) && count($blogs) > 0): ?>
+        <?php if (isset($pendingBlogs) && count($pendingBlogs) > 0): ?>
             <ul class="blogs-list">
                 <?php foreach ($blogs as $blog): ?>
-                    <li class="blog-item">
-                       <div class="blog-actions">
-                            <?php if ($is_loggedIn): ?>
-                                <?php if ($is_admin): ?>
-                                    <a href="/blog-app/frontend/Pages/blog/delete.php?id=<?php echo $blog['blog_id'] ?>">Delete</a>
-                                    <a href="/blog-app/frontend/Pages/blog/updateBlog.php?id=<?php echo $blog['blog_id'] ?>">Edit</a>
-                                <?php endif; ?>
-                                <a href="/blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=<?php echo $blog['blog_id'] ?>">View</a>
-                            <?php else: ?>
-                                <a href="">View</a>
-                            <?php endif; ?>
-                        </div>
-
-                        <h2><?php echo htmlspecialchars($blog['title']); ?></h2>
-                        <p><?php echo htmlspecialchars(substr($blog['content'], 0, 100) . '...'); ?></p>
-                        <p class="blog-author">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
-                        <p class="blog-date">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
-                    </li>
+                    <?php if (!$blog['approved']): ?> 
+                        <li class="blog-item" id="blog-<?php echo $blog['blog_id']; ?>">
+                            <div class="blog-actions">
+                                <a href="/blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=<?php echo $blog['blog_id']; ?>">View</a>
+                                <button class="approve-btn" data-blog-id="<?php echo $blog['blog_id']; ?>">Approve</button>
+                                <span class="approved-label" id="approved-label-<?php echo $blog['blog_id']; ?>"></span>
+                            </div>
+                            <h2><?php echo htmlspecialchars($blog['title']); ?></h2>
+                            <p><?php echo htmlspecialchars(substr($blog['content'], 0, 150) . '...'); ?></p>
+                            <p class="blog-author">Author ID: <?php echo htmlspecialchars($blog['author_id']); ?></p>
+                            <p class="blog-date">Submitted on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
+                        </li>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
-            <p>No blogs available.</p>
+            <p  style="text-align:center; font-size:18px; color:#555; margin-top:20px;">No blogs waiting for approval.</p>
         <?php endif; ?>
     </div>
+
+    <script>
+document.querySelectorAll(".approve-btn").forEach(btn => {
+    btn.addEventListener("click", async function() {
+        const blogId = this.dataset.blogId;
+        const label = document.getElementById("approved-label-" + blogId);
+        const button = this;
+
+        try {
+            const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/approve-blog/${blogId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    author_id: <?php echo $_SESSION['user']['user_id']; ?>
+                })
+            });
+
+            const responseText = await response.text();
+            console.log("Raw API Response:", responseText);
+
+            let data;
+            try {
+                const cleanText = responseText.replace(/^[^{]+/, '');
+                data = JSON.parse(cleanText);
+            } catch (e) {
+                console.error("JSON parse failed:", e);
+                label.innerText = "Invalid response format";
+                label.style.color = "red";
+                return;
+            }
+
+            if (data.success === true) {
+                button.disabled = true;
+                label.innerText = "Approved";
+                label.style.color = "green";
+            } else {
+                label.innerText = "Failed: " + (data.message || "Unknown error");
+                label.style.color = "red";
+            }
+        } catch (err) {
+            console.error("Fetch error:", err);
+            label.innerText = "Error approving blog";
+            label.style.color = "red";
+        }
+    });
+});
+</script>
+
 </body>
 </html>

@@ -190,7 +190,7 @@ class AuthController {
                     'success' => true,
                     'message' => 'Users fetched successfully',
                     'status_code' => 200,
-                    'usres' => $users
+                    'users' => $users
                 ]);
             }
             return $this->sendJson([

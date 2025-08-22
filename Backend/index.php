@@ -65,6 +65,15 @@ switch ($resource) {
                 echo json_encode(["success" => false, "message" => "Blog ID is required"]);
             }
         }
+        elseif ($action === 'fetch-pending-approval-blogs') {
+            $author_id = $segments[6] ?? null;
+            
+            if ($author_id) {
+                $blog_controller->fetch_pending_approval_blogs_of_particular_user($author_id, $input);
+            } else {
+                echo json_encode(["success" => false, "message" => "Author ID is required"]);
+            }
+        }
         elseif ($action === "delete") {
             $blog_id = $segments[6] ?? null;
             if ($blog_id) {
