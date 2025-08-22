@@ -19,7 +19,7 @@ class BlogController {
             $title = trim($data['title']);
             $content = trim($data['content']);
             $author_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $data['author_id'];
-            var_dump($author_id);
+            // var_dump($author_id);
             if (!$author_id) {
                 return $this->sendJson([
                     'success' => false,
@@ -30,10 +30,18 @@ class BlogController {
 
             $user = new User($this->db);
             $user_data = $user->getById($author_id);
-            if (!$user_data || $user_data['role'] !== 'admin') {
+            // if (!$user_data || $user_data['role'] !== 'admin') {
+            //     return $this->sendJson([
+            //         'success' => false,
+            //         'message' => 'User is not authorized to create a blog',
+            //         'status_code' => 403
+            //     ]);
+            // }
+
+            if (!$user_data) {
                 return $this->sendJson([
                     'success' => false,
-                    'message' => 'User is not authorized to create a blog',
+                    'message' => 'User data is missing',
                     'status_code' => 403
                 ]);
             }
@@ -218,6 +226,9 @@ class BlogController {
 
     public function fetch_blog_by_id($blog_id) {
         try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
             if (!$blog_id) {
                 return $this->sendJson([
                     'success' => false,
@@ -237,6 +248,109 @@ class BlogController {
             return $this->sendJson([
                 'success' => false,
                 'message' => 'Blog not found',
+                'status_code' => 404
+            ]);
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
+
+    public function approve_blog($blog_id, $data) {
+        try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $author_id="";
+            if (isset($data['author_id'])) $author_id = trim($data['author_id']) ?? $_SESSION['user_id'] ?? null;
+            if (!$author_id) {
+                $author_id = $_SESSION['user_id'] ?? null;
+            }
+
+            if (!$author_id) {
+                $author_id = isset($_COOKIE['user_id']) ? $_COOKIE['user_id'] : null;
+            }
+
+
+            if (!$author_id) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'User not authenticated',
+                    'status_code' => 403
+                ]);
+            }
+            $user = new User($this->db);
+            $user_data = $user->getById($author_id);
+            if (!$user_data || $user_data['role'] !== 'admin') {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'User is not authorized to approve a blog',
+                    'status_code' => 403
+                ]);
+            }
+            if (!$blog_id) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Blog ID is required',
+                    'status_code' => 400
+                ]);
+            }
+            $result = $this->blog->approveBlog($blog_id);
+            if ($result) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'Blog approved successfully',
+                    'status_code' => 200,
+                    'blog' => $result
+                ]);
+            }
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'Blog not found',
+                'status_code' => 404
+            ]);
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
+
+    public function fetch_blogs_by_user_id($author_id) {
+         try {
+            // $author_id="";
+            // if (isset($data['author_id'])) $author_id = trim($data['author_id']) ?? $_SESSION['user_id'] ?? null;
+            // if (!$author_id) {
+            //     $author_id = $_SESSION['user_id'] ?? null;
+            // }
+            echo $author_id;
+            if (!$author_id) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'User not authenticated',
+                    'status_code' => 403,
+                    'author_id' => $author_id,
+                ]);
+            }
+
+            $result = $this->blog->fetchBlogsByUserId($author_id);
+            if ($result) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'Blog fetched successfully',
+                    'status_code' => 200,
+                    'blog' => $result
+                ]);
+            }
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'Blogs not found',
                 'status_code' => 404
             ]);
         } catch (\Throwable $th) {

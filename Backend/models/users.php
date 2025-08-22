@@ -34,6 +34,16 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC); 
     }
 
+    public function fetchAllUsers() {
+        $stmt = $this->conn->prepare("SELECT * FROM users ORDER BY created_at DESC");
+        $stmt->execute();
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($users) {
+            return $users;
+        }
+        return [];
+    }
+
     public function existsByEmail($email) {
         $stmt = $this->conn->prepare(
             "SELECT user_id FROM users WHERE email = :email"

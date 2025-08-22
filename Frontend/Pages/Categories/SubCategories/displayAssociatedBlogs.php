@@ -78,6 +78,10 @@ if ($result) {
             color: green;
             margin-bottom: 10px;
         }
+        a {
+            text-decoration: none;
+            color: black;
+        }
     </style>
 </head>
 <body>

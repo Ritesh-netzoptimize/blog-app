@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="actions">
                 <button class="btn" type="submit">Save Changes</button>
-                <a class="btn btn-secondary" href="/blog-app/frontend/Pages/allBlogs.php">Cancel</a>
+                <a class="btn btn-secondary" href="/blog-app/Frontend/Pages/adminDashboard.php">Cancel</a>
             </div>
         </form>
     </div>

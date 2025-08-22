@@ -3,9 +3,12 @@ require_once(__DIR__ . '/../models/users.php');
 
 class AuthController {
     private $db;
+    private $user;
 
     public function __construct($db) {
         $this->db = $db;
+        $this->user = new User($db); 
+
     }
     
     public function register($data) {
@@ -54,7 +57,8 @@ class AuthController {
                     'user' => [
                         'user_id' => $new_user_id,
                         'username' => $username,
-                        'email' => $email
+                        'email' => $email,
+                        'role' => 'user'
                     ]
                 ];
                 return $this->sendJson($response);
@@ -159,6 +163,40 @@ class AuthController {
                 'success' => true,
                 'message' => 'User logged out successfully',
                 'status_code' => 200
+            ]);
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
+
+    public function fetch_all_users($data) {
+        try {
+            $user_role = $data['role'] 
+                ?? ($_SESSION['role'] ?? ($_SESSION['user']['role'] ?? null));
+            if ($user_role !== 'admin') {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Only admin can fetch all users',
+                    'status_code' => 403
+                ]);
+            }
+            $users = $this->user->fetchAllUsers();
+            if ($users) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'Users fetched successfully',
+                    'status_code' => 200,
+                    'usres' => $users
+                ]);
+            }
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'No users found',
+                'status_code' => 404
             ]);
         } catch (\Throwable $th) {
             return $this->sendJson([

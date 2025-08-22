@@ -75,6 +75,17 @@ class Blog {
         return false;
     }
 
+    public function approveBlog($blog_id) {
+        $stmt = $this->conn->prepare("UPDATE blogs SET approved = 1 WHERE blog_id = :blog_id");
+        $stmt->bindParam(":blog_id", $blog_id, PDO::PARAM_INT);
+        $success = $stmt->execute();
+        echo $success;
+        if ($success) {
+            return true;
+        }
+        return false;
+    }
+
     public function findBlogById($blog_id) {
         $stmt = $this->conn->prepare("SELECT * FROM blogs WHERE blog_id = :blog_id");
         $stmt->bindParam(":blog_id", $blog_id, PDO::PARAM_INT);
@@ -82,6 +93,16 @@ class Blog {
         $blog = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($blog) {
             return $blog;
+        }
+        return false;
+    }
+    public function fetchBlogsByUserId($author_id) {
+        $stmt = $this->conn->prepare("SELECT * FROM blogs WHERE author_id = :author_id");
+        $stmt->bindParam(":author_id", $author_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($blogs) {
+            return $blogs;
         }
         return false;
     }

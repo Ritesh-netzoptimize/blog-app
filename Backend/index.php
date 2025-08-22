@@ -32,6 +32,7 @@ switch ($resource) {
         if ($action === "register") $auth_controller->register($input);
         elseif ($action === "login") $auth_controller->login($input);
         elseif ($action === "logout") $auth_controller->logout($input);
+        elseif ($action === "fetch-all-users") $auth_controller->fetch_all_users($input);
         else echo json_encode(["success" => false, "message" => "Invalid auth action"]);
         break;
 
@@ -42,6 +43,24 @@ switch ($resource) {
             $blog_id = $segments[6] ?? null;
             if ($blog_id) {
                 $blog_controller->fetch_blog_by_id($blog_id);
+            } else {
+                echo json_encode(["success" => false, "message" => "Blog ID is required"]);
+            }
+        }
+        elseif ($action === "fetch-blogs-by-user-id") { 
+            $author_id = $segments[6] ?? null;
+            
+            if ($author_id) {
+                $blog_controller->fetch_blogs_by_user_id($author_id);
+            } else {
+                echo json_encode(["success" => false, "message" => "Author ID is required"]);
+            }
+        }
+        elseif ($action === "approve-blog") { 
+            $blog_id = $segments[6] ?? null;
+            
+            if ($blog_id) {
+                $blog_controller->approve_blog($blog_id, $input);
             } else {
                 echo json_encode(["success" => false, "message" => "Blog ID is required"]);
             }
