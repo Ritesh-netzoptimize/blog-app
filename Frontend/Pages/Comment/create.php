@@ -5,23 +5,15 @@ if (session_status() === PHP_SESSION_NONE) {
 $responseMessage = "";
 
 $blogId = isset($_GET['id']) ? intval($_GET['id']) : 0;
-
 if ($blogId <= 0) {
     die("Invalid Blog ID.");
 }
 
 $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
-if (!$is_loggedIn) {
-    die("You must be logged in to comment.");
-}
+$author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
 
-$author_id = isset($_SESSION['user']['user_id']) ? $_SESSION['user']['user_id'] : '';
-// var_dump($author_id);
-if (!$author_id) {
-    die("User ID is required.");
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Handle POST only if logged in
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_loggedIn) {
     $comment = isset($_POST['comment']) ? trim($_POST['comment']) : '';
     if ($comment && $author_id) {
         $commentData = [
@@ -38,38 +30,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'Content-Type: application/json'
         ]);
         $result = curl_exec($ch);
-        if ($result === false) {
-            $responseMessage = "cURL Error: " . curl_error($ch);
-        }
         curl_close($ch);
+
         $cleanResult = preg_replace('/^[^{]+/', '', $result);
         $json_response = json_decode($cleanResult, true);
-        if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
-            echo json_encode([
-            "success" => true,
-            "message" => "Comment added successfully!"
-        ]);
-        exit;
+        if ($json_response && $json_response['success']) {
+            $responseMessage = "Comment added successfully!";
         } else {
-            echo json_encode([
-                "success" => false,
-                "message" => "Failed to add comment.",
-                "raw" => $result
-            ]);
-            exit;
+            $responseMessage = "Failed to add comment.";
         }
     } else {
-        $responseMessage = "comment and Author ID are required.";
-    }
-} else {
-    if (isset($_GET['success']) && $_GET['success'] == 1) {
-        $responseMessage = "Comment added successfully!";
-    } else {
-        $responseMessage = "";
+        $responseMessage = "Comment cannot be empty.";
     }
 }
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -93,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <input type="hidden" name="author_id" value="<?php echo htmlspecialchars($author_id); ?>">
 
-            <button type="submit">comment</button>
+            <button type="submit" style="margin-bottom: 20px;">comment</button>
         </form>
     </div>
 </body>

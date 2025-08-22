@@ -21,6 +21,7 @@ $comments = ($json_response && isset($json_response['success']) && $json_respons
     ? $json_response['comments']
     : [];
 
+
 function fetchReplies($commentId) {
     $URL = "http://localhost/blog-app/backend/api/v1/comment/fetch-by-comment/$commentId";
     $ch = curl_init($URL);
@@ -64,26 +65,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_text'])) {
         : "Failed to add reply.";
 }
 
-function renderComment($comment, $blogId) {
+function renderComment($comment, $blogId, $is_loggedIn) {
     $replies = fetchReplies($comment['comment_id']);
     ?>
     <li class="comment">
         <p><?php echo htmlspecialchars($comment['comment']); ?></p>
-        <p class="comment-author">Username: <?php echo htmlspecialchars($comment['username']); ?></p>
-        <p class="comment-date">Posted on: <?php echo htmlspecialchars($comment['created_at']); ?></p>
+        <p class="comment-author">By: <?php echo htmlspecialchars($comment['username']); ?></p>
+        <p class="comment-date">On: <?php echo htmlspecialchars($comment['created_at']); ?></p>
 
         <div class="comment-actions">
-            <a href="javascript:void(0);" class="reply-toggle" data-id="<?php echo $comment['comment_id']; ?>">Reply</a>
-
-            <?php if ($_SESSION['user']['role'] === 'admin'): ?>
-                <a href="/blog-app/frontend/Pages/Comment/delete.php?id=<?php echo $comment['comment_id'] ?>">Delete</a>
-            <?php endif; ?>
-
-            <?php if ($_SESSION['user']['username'] === $comment['username']): ?>
-                <a href="/blog-app/Frontend/Pages/Comment/update.php?id=<?php echo $comment['comment_id'] ?>">Edit</a>
-                <?php if ($_SESSION['user']['role'] !== 'admin'): ?>
-                    <a href="/blog-app/frontend/Pages/Comment/delete.php?id=<?php echo $comment['comment_id'] ?>">Delete</a>
-                <?php endif; ?>
+            <?php if ($is_loggedIn): ?>
+                <a href="javascript:void(0);" class="reply-toggle" data-id="<?php echo $comment['comment_id']; ?>">Reply</a>
+            <?php else: ?>
+                <span style="color:gray; font-size:0.9em;">Login to reply</span>
             <?php endif; ?>
         </div>
 
@@ -91,21 +85,25 @@ function renderComment($comment, $blogId) {
             <?php if (!empty($replies)): ?>
                 <ul style="list-style-type:none; padding-left:0;">
                     <?php foreach ($replies as $reply): ?>
-                        <?php renderComment($reply, $blogId); ?>
+                        <?php renderComment($reply, $blogId, $is_loggedIn); ?>
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
 
-            <form method="post" class="reply-input">
-                <input type="hidden" name="parent_id" value="<?php echo $comment['comment_id']; ?>">
-                <input type="hidden" name="blog_id" value="<?php echo $blogId; ?>">
-                <input type="text" name="reply_text" placeholder="Write a reply..." required>
-                <button type="submit">Send</button>
-            </form>
+            <!-- Reply form only if logged in -->
+            <?php if ($is_loggedIn): ?>
+                <form method="post" class="reply-input">
+                    <input type="hidden" name="parent_id" value="<?php echo $comment['comment_id']; ?>">
+                    <input type="hidden" name="blog_id" value="<?php echo $blogId; ?>">
+                    <input type="text" name="reply_text" placeholder="Write a reply..." required>
+                    <button type="submit">Send</button>
+                </form>
+            <?php endif; ?>
         </div>
     </li>
     <?php
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -165,19 +163,33 @@ body {
 
 <div class="comments-section">
     <h2>Comments</h2>
-    <?php if ($responseMessage): ?>
+
+    <?php if (!empty($responseMessage)) : ?>
         <p style="color: green;"><?php echo $responseMessage; ?></p>
     <?php endif; ?>
+
+    <!-- Always show comments -->
     <?php if (!empty($comments)): ?>
         <ul style="list-style-type:none; padding-left:0;">
             <?php foreach ($comments as $comment): ?>
-                <?php renderComment($comment, $blogId); ?>
+                <?php renderComment($comment, $blogId, $is_loggedIn); ?>
             <?php endforeach; ?>
         </ul>
     <?php else: ?>
         <p>No comments yet. Be the first to comment!</p>
     <?php endif; ?>
+
+    <!-- Show add-comment form only if logged in -->
+    <?php if ($is_loggedIn): ?>
+        <form method="POST" action="">
+            <input type="text" name="comment" placeholder="Write a comment..." required>
+            <button type="submit">Comment</button>
+        </form>
+    <?php else: ?>
+        <!-- <p style="color: red;">You must be logged in to comment.</p> -->
+    <?php endif; ?>
 </div>
+
 
 <script>
 document.addEventListener('click', function(e) {

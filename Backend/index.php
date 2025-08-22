@@ -6,12 +6,14 @@ require_once(__DIR__ . '/controllers/auth.controller.php');
 require_once(__DIR__ . '/controllers/blog.controller.php');
 require_once(__DIR__ . '/controllers/comment.controller.php');
 require_once(__DIR__ . '/controllers/category.controller.php');
+require_once(__DIR__ . '/controllers/like.controller.php');
 
 $db = (new Database())->getConnection();
 $auth_controller = new AuthController($db);
 $blog_controller = new BlogController($db);
 $comment_controller = new CommentController($db);
 $category_controller = new CategoryController($db);
+$like_controller = new LikeController($db);
 
 $input = json_decode(file_get_contents("php://input"), true);
 $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
@@ -39,6 +41,22 @@ switch ($resource) {
     case 'blog':
         if ($action === "create") $blog_controller->create_blog($input);
         elseif ($action === "fetch-all") $blog_controller->fetch_blogs();
+        elseif($action === "like") {
+            $blog_id = $segments[6] ?? null;
+            if ($blog_id) {
+                $like_controller->toggle_like($blog_id, $input);
+            } else {
+                echo json_encode(["success" => false, "message" => "Blog ID is required"]);
+            }
+        }
+        elseif($action === "likes-count") {
+            $blog_id = $segments[6] ?? null;
+            if ($blog_id) {
+                $like_controller->fetch_likes_count_by_blog_id($blog_id);
+            } else {
+                echo json_encode(["success" => false, "message" => "Blog ID is required"]);
+            }
+        }
         elseif ($action === "fetch-single") { 
             $blog_id = $segments[6] ?? null;
             if ($blog_id) {

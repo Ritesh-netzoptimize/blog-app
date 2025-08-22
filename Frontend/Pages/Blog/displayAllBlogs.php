@@ -61,8 +61,8 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
                                         <a href="/blog-app/frontend/Pages/blog/delete.php?id=<?php echo $blog['blog_id'] ?>">Delete</a>
                                         <a href="/blog-app/frontend/Pages/blog/updateBlog.php?id=<?php echo $blog['blog_id'] ?>">Edit</a>
                                     <?php endif; ?>
+                                    <?php endif; ?>
                                     <a href="/blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=<?php echo $blog['blog_id'] ?>">View</a>
-                                <?php endif; ?>
                             </div>
                             <h2><?php echo htmlspecialchars($blog['title']); ?></h2>
                             <p><?php echo htmlspecialchars(substr($blog['content'], 0, 100) . '...'); ?></p>

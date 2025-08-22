@@ -31,7 +31,7 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
     $blogs = $json_response['blogs'];
     $pendingBlogs = array_filter($blogs, function($b) {
         return !$b['approved'];
-        });
+    });
 } else {
     $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
     $blogs = [];
