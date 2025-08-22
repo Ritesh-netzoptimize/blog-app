@@ -17,11 +17,19 @@ class LikeController {
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
-            $author_id="";
-            if (isset($data['author_id'])) $author_id = trim($data['author_id']) ?? $_SESSION['user_id'] ?? null;
-            if (!$author_id) {
-                $author_id = $_SESSION['user_id'] ?? null;
+            $author_id = null;
+
+        if (!empty($data['author_id'])) {
+            $author_id = trim($data['author_id']);
+        }
+
+        if (!$author_id) {
+            if (isset($_SESSION['user']['user_id'])) {
+                $author_id = $_SESSION['user']['user_id'];
+            } elseif (isset($_SESSION['user_id'])) {
+                $author_id = $_SESSION['user_id'];
             }
+        }
             if (!$author_id) {
                 return $this->sendJson([
                     'success' => false,

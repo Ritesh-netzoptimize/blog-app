@@ -52,3 +52,42 @@
 .back-link:hover {
     color: #1c5980;
 }
+
+.like-container {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    padding: 6px 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.like-btn {
+    font-size: 25px !important;
+    cursor: pointer !important;
+    border: none;
+    background: none;
+    transition: transform 0.2s ease;
+}
+
+.like-btn:hover {
+    transform: scale(1.2);
+}
+
+.liked {
+    color: #e63946; /* red */
+}
+
+.unliked {
+    color: #aaa; /* grey */
+}
+
+.like-count {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
