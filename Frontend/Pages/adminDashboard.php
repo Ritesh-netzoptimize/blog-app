@@ -37,6 +37,12 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
     <title>All Blogs</title>
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/blogs.css">
 </head>
+<style>
+    a {
+        text-decoration: none;
+        color: black;   
+    }
+</style>
 <body>
     <?php include_once '../Templates/header.php'; ?>
     <div class="blogs-container">

@@ -76,6 +76,14 @@ switch ($resource) {
                 echo json_encode(["success" => false, "message" => "Blog ID is required to fetch comments"]);
             }
         }
+        else if ($action === "fetch-by-comment") {
+            $comment_id = $segments[6] ?? null;
+            if ($comment_id) {
+                $comment_controller->fetch_replies_by_comment_id($comment_id);
+            } else {
+                echo json_encode(["success" => false, "message" => "Comment ID is required to fetch replies"]);
+            }
+        }
         else if ($action === "delete") {
             $comment_id = $segments[6] ?? null;
             if ($comment_id) {

@@ -60,7 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin: 0;
             padding: 0;
         }
-
+    a {
+        text-decoration: none;
+        color: black;
+    }
         .container {
             max-width: 700px;
             margin: 50px auto;

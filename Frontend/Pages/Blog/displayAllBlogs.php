@@ -35,6 +35,11 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
     <title>All Blogs</title>
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/blogs.css">
 </head>
+<style>
+    a {
+        text-decoration: none;
+    }
+</style>
 <body>
     <div class="blogs-container">
         <h1>All Blogs</h1>

@@ -42,40 +42,79 @@ class CommentController {
                     'status_code' => 401
                 ]);
             }
-            $new_comment_id = $this->comment->create($comment, $blog_id, $author_id);
-            if ($new_comment_id) {
-                $blog = $this->blogInstance->findBlogById($blog_id);
-                if (!$blog) {
+            $comment_id = $data['comment_id'];
+            if (!$comment_id) {
+                $new_comment_id = $this->comment->create($comment, $blog_id, $author_id);
+                if ($new_comment_id) {
+                    $blog = $this->blogInstance->findBlogById($blog_id);
+                    if (!$blog) {
+                        return $this->sendJson([
+                            'success' => false,
+                            'message' => 'Blog not found',
+                            'status_code' => 404
+                        ]);
+                    }
+
+                    $user = $this->userInstance->getById($author_id);
+                    if (!$user) {
+                        return $this->sendJson([
+                            'success' => false,
+                            'message' => 'User not found',
+                            'status_code' => 404
+                        ]);
+                    }
+
                     return $this->sendJson([
-                        'success' => false,
-                        'message' => 'Blog not found',
-                        'status_code' => 404
+                        'success' => true,
+                        'message' => 'Comment created successfully',
+                        'status_code' => 200,
+                        'comment_id' => $new_comment_id,
+                        'blog_title' => $blog['title'] ?? null,
+                        'username' => $user['username'] ?? null
                     ]);
                 }
-
-                $user = $this->userInstance->getById($author_id);
-                if (!$user) {
-                    return $this->sendJson([
-                        'success' => false,
-                        'message' => 'User not found',
-                        'status_code' => 404
-                    ]);
-                }
-
                 return $this->sendJson([
-                    'success' => true,
-                    'message' => 'Comment created successfully',
-                    'status_code' => 200,
-                    'comment_id' => $new_comment_id,
-                    'blog_title' => $blog['title'] ?? null,
-                    'username' => $user['username'] ?? null
+                    'success' => false,
+                    'message' => 'Comment creation failed due to database issue',
+                    'status_code' => 502
+                ]);
+            } else {
+                $new_reply_id = $this->comment->createReply($comment_id, $comment, $blog_id, $author_id);
+                if ($new_reply_id) {
+                    $blog = $this->blogInstance->findBlogById($blog_id);
+                    if (!$blog) {
+                        return $this->sendJson([
+                            'success' => false,
+                            'message' => 'Blog not found',
+                            'status_code' => 404
+                        ]);
+                    }
+
+                    $user = $this->userInstance->getById($author_id);
+                    if (!$user) {
+                        return $this->sendJson([
+                            'success' => false,
+                            'message' => 'User not found',
+                            'status_code' => 404
+                        ]);
+                    }
+
+                    return $this->sendJson([
+                        'success' => true,
+                        'message' => 'Reply created successfully',
+                        'status_code' => 200,
+                        'reply_id' => $new_reply_id,
+                        'blog_title' => $blog['title'] ?? null,
+                        'username' => $user['username'] ?? null
+                    ]);
+                }
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Comment creation failed due to database issue',
+                    'status_code' => 502
                 ]);
             }
-            return $this->sendJson([
-                'success' => false,
-                'message' => 'Comment creation failed due to database issue',
-                'status_code' => 502
-            ]);
+            
         } catch (\Throwable $th) {
             return $this->sendJson([
                 'success' => false,
@@ -109,6 +148,41 @@ class CommentController {
             return $this->sendJson([
                 'success' => false,
                 'message' => 'No comments found for this blog',
+                'status_code' => 404
+            ]);
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
+
+    public function fetch_replies_by_comment_id($comment_id) {
+        try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            if (!$comment_id) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Comment ID is required',
+                    'status_code' => 400
+                ]);
+            }
+            $replies = $this->comment->fetchByCommentId($comment_id);
+            if ($replies) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'Replies fetched successfully',
+                    'status_code' => 200,
+                    'replies' => $replies
+                ]);
+            }
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'No replies found for this blog',
                 'status_code' => 404
             ]);
         } catch (\Throwable $th) {

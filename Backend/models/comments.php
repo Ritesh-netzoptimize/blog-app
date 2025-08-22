@@ -24,8 +24,24 @@ class Comment {
         return false;
     }
 
+    public function createReply($parent_id, $comment, $blog_id, $author_id) {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO comments (comment, blog_id, parent_id, user_id) VALUES (:comment, :blog_id, :parent_id, :author_id)"
+        );
+        $result = $stmt->execute([
+            ':comment' => $comment,
+            ':blog_id' => $blog_id,
+            ':parent_id' => $parent_id,
+            ':author_id' => $author_id
+        ]);
+        if ($result) {
+            return $this->conn->lastInsertId();
+        }
+        return false;
+    }
+
     public function fetchByBlogId($blog_id) {
-        $stmt = $this->conn->prepare("SELECT * FROM comments WHERE blog_id = :blog_id ORDER BY created_at DESC");
+        $stmt = $this->conn->prepare("SELECT * FROM comments WHERE blog_id = :blog_id AND parent_id is NULL ORDER BY created_at ASC");
         $stmt->execute([':blog_id' => $blog_id]);
         $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
@@ -35,6 +51,20 @@ class Comment {
                 $comment['username'] = $this->getUsernameById($comment['user_id']);
             }
             return $comments;
+        }
+        return [];
+    }
+
+    public function fetchByCommentId($parent_id) {
+        $stmt = $this->conn->prepare("SELECT * FROM comments WHERE parent_id = :parent_id ORDER BY created_at ASC");
+        $stmt->execute([':parent_id' => $parent_id]);
+        $replies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        if ($replies) {
+            foreach ($replies as &$reply) {
+                $reply['username'] = $this->getUsernameById($reply['user_id']);
+            }
+            return $replies;
         }
         return [];
     }
