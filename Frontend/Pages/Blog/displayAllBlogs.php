@@ -22,6 +22,9 @@ $cleanResult = preg_replace('/^[^{]+/', '', $result);
 $json_response = json_decode($cleanResult, true);
 if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
     $blogs = $json_response['blogs'];
+     $approvedBlogs = array_filter($blogs, function($b) {
+        return $b['approved'];
+    });
 } else {
     $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
 }
@@ -47,12 +50,11 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
             <a href="/blog-app/frontend/Pages/Blog/createBlog.php"><div class="create-blog-button">Create New Blog</div></a>
         <?php endif; ?>
         <?php if ($responseMessage): ?>
-            <div class="response-message"><?php echo $responseMessage; ?></div>
             <?php endif; ?>
 
-        <?php if (isset($blogs) && count($blogs) > 0): ?>
+        <?php if (isset($approvedBlogs) && count($approvedBlogs) > 0): ?>
             <ul class="blogs-list">
-                <?php foreach ($blogs as $blog): ?>
+                <?php foreach ($approvedBlogs as $blog): ?>
                     <?php if($blog['approved']): ?> 
                         <li class="blog-item">
                             <div class="blog-actions">

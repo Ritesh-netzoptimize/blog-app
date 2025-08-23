@@ -61,11 +61,22 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
 </div>
 
 
-    <h1 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h1>
-    <p class="blog-text"><?php echo htmlspecialchars($blog['content']); ?></p>
-    <p class="blog-meta">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
-    <p class="blog-meta">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
-    <a class="back-link" href="/blog-app/frontend/index.php">Back to all blogs</a>
+   <h1 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h1>
+<p class="blog-text"><?php echo nl2br(htmlspecialchars($blog['content'])); ?></p>
+
+<?php if (!empty($blog['image_path'])): ?>
+    <div class="blog-image">
+        <img src="/blog-app/backend/<?php echo htmlspecialchars($blog['image_path']); ?>" 
+     alt="Blog Image" 
+     style="margin-left:20px;">
+
+    </div>
+<?php endif; ?>
+
+<p class="blog-meta">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
+<p class="blog-meta">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
+<a class="back-link" href="/blog-app/frontend/index.php">Back to all blogs</a>
+
 
     <?php include_once '../Comment/create.php'; ?>
     <?php include_once '../Comment/display.php'; ?>

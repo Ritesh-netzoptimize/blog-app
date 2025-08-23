@@ -8,22 +8,23 @@ class Blog {
         $this->conn = $db;
     }
 
-    public function create($title, $content, $author_id) {
+    public function create($title, $content, $author_id, $image_path) {
         if ($author_id == 1) {
             $stmt = $this->conn->prepare(
-            "INSERT INTO blogs (title, content, author_id, approved) VALUES (:title, :content, :author_id, 1)"
+            "INSERT INTO blogs (title, content, author_id, image_path, approved) VALUES (:title, :content, :author_id, :image_path, 1)"
             );
         }
         else {
             $stmt = $this->conn->prepare(
-            "INSERT INTO blogs (title, content, author_id) VALUES (:title, :content, :author_id)"
+            "INSERT INTO blogs (title, content, author_id, image_path) VALUES (:title, :content, :author_id, :image_path)"
             );
         }
 
         $result = $stmt->execute([
             ':title' => $title,
             ':content' => $content,
-            ':author_id' => $author_id
+            ':author_id' => $author_id,
+            ':image_path' => $image_path
         ]);
 
         if ($result) {

@@ -11,15 +11,80 @@ class BlogController {
         $this->blog = new Blog($db); 
     }
 
+    // public function create_blog($data) {
+    //     try {
+    //         if (session_status() === PHP_SESSION_NONE) {
+    //             session_start();
+    //         }
+    //         $title = trim($data['title']);
+    //         $content = trim($data['content']);
+    //         $author_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $data['author_id'];
+    //         // var_dump($author_id);
+    //         if (!$author_id) {
+    //             return $this->sendJson([
+    //                 'success' => false,
+    //                 'message' => 'User not authenticated as author_id is missing',
+    //                 'status_code' => 403
+    //             ]);
+    //         }
+
+    //         $user = new User($this->db);
+    //         $user_data = $user->getById($author_id);
+    //         // if (!$user_data || $user_data['role'] !== 'admin') {
+    //         //     return $this->sendJson([
+    //         //         'success' => false,
+    //         //         'message' => 'User is not authorized to create a blog',
+    //         //         'status_code' => 403
+    //         //     ]);
+    //         // }
+
+    //         if (!$user_data) {
+    //             return $this->sendJson([
+    //                 'success' => false,
+    //                 'message' => 'User data is missing',
+    //                 'status_code' => 403
+    //             ]);
+    //         }
+
+    //         if (!$title || !$content || !$author_id) {
+    //             return $this->sendJson([
+    //                 'success' => false,
+    //                 'message' => 'All fields are required',
+    //                 'status_code' => 401
+    //             ]);
+    //         }
+    //         $new_blog_id = $this->blog->create($title, $content, $author_id);
+    //         if ($new_blog_id) {
+    //             return $this->sendJson([
+    //                 'success' => true,
+    //                 'message' => 'Blog created successfully',
+    //                 'status_code' => 200,
+    //                 'blog_id' => $new_blog_id
+    //             ]);
+    //         }
+    //         return $this->sendJson([
+    //             'success' => false,
+    //             'message' => 'Blog creation failed due to database issue',
+    //             'status_code' => 502
+    //         ]);
+    //     } catch (\Throwable $th) {
+    //         //throw $th;
+    //         return $this->sendJson([
+    //             'success' => false,
+    //             'message' => 'An error occurred: ' . $th->getMessage(),
+    //             'status_code' => 500
+    //         ]);
+    //     }
+    // }
+
     public function create_blog($data) {
         try {
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
-            $title = trim($data['title']);
-            $content = trim($data['content']);
-            $author_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : $data['author_id'];
-            // var_dump($author_id);
+            $title     = trim($data['title']    ?? ($_POST['title']    ?? ''));
+            $content   = trim($data['content']  ?? ($_POST['content']  ?? ''));
+            $author_id = $data['author_id']     ?? ($_SESSION['user_id'] ?? ($_POST['author_id'] ?? null));
             if (!$author_id) {
                 return $this->sendJson([
                     'success' => false,
@@ -27,17 +92,8 @@ class BlogController {
                     'status_code' => 403
                 ]);
             }
-
             $user = new User($this->db);
-            $user_data = $user->getById($author_id);
-            // if (!$user_data || $user_data['role'] !== 'admin') {
-            //     return $this->sendJson([
-            //         'success' => false,
-            //         'message' => 'User is not authorized to create a blog',
-            //         'status_code' => 403
-            //     ]);
-            // }
-
+            $user_data = $user->getById((int)$author_id);
             if (!$user_data) {
                 return $this->sendJson([
                     'success' => false,
@@ -45,30 +101,97 @@ class BlogController {
                     'status_code' => 403
                 ]);
             }
-
-            if (!$title || !$content || !$author_id) {
+            if (!$title || !$content) {
                 return $this->sendJson([
                     'success' => false,
                     'message' => 'All fields are required',
                     'status_code' => 401
                 ]);
             }
-            $new_blog_id = $this->blog->create($title, $content, $author_id);
+
+            $image_path = null;
+            echo "outside the if of";
+
+            if (!empty($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+                $file = $_FILES['image'];
+                if ($file['error'] !== UPLOAD_ERR_OK) {
+                    return $this->sendJson([
+                        'success' => false,
+                        'message' => 'Image upload error (code '.$file['error'].')',
+                        'status_code' => 400
+                    ]);
+                }
+
+                $maxBytes = 10 * 1024 * 1024;
+                if ($file['size'] > $maxBytes) {
+                    return $this->sendJson([
+                        'success' => false,
+                        'message' => 'Image too large. Max 10MB.',
+                        'status_code' => 413
+                    ]);
+                }
+
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $mime  = $finfo->file($file['tmp_name']);
+                $allowed = [
+                    'image/jpeg' => 'jpg',
+                    'image/png'  => 'png',
+                    'image/webp' => 'webp',
+                ];
+                if (!isset($allowed[$mime])) {
+                    return $this->sendJson([
+                        'success' => false,
+                        'message' => 'Unsupported image type. Allowed: JPG, PNG, WEBP.',
+                        'status_code' => 415
+                    ]);
+                }
+                $extension = $allowed[$mime];
+
+                $uploadDir = __DIR__ . '/../uploads/blogs';          
+                $publicRel = 'uploads/blogs';                            
+                if (!is_dir($uploadDir)) {
+                    if (!mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+                        return $this->sendJson([
+                            'success' => false,
+                            'message' => 'Failed to create upload directory.',
+                            'status_code' => 500
+                        ]);
+                    }
+                }
+                $filename = 'blog_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $extension;
+                $destAbs  = $uploadDir . '/' . $filename;
+                $destRel  = $publicRel . '/' . $filename;
+
+                $resized = $this->resizeAndCropToAspect($file['tmp_name'], $destAbs, 720, 480, $mime);
+                if (!$resized) {
+                    return $this->sendJson([
+                        'success' => false,
+                        'message' => 'Failed processing image.',
+                        'status_code' => 500
+                    ]);
+                }
+
+                $image_path = $destRel;
+            }
+            $new_blog_id = $this->blog->create($title, $content, (int)$author_id, $image_path);
+
             if ($new_blog_id) {
                 return $this->sendJson([
                     'success' => true,
                     'message' => 'Blog created successfully',
                     'status_code' => 200,
-                    'blog_id' => $new_blog_id
+                    'blog_id' => $new_blog_id,
+                    'image_path' => $image_path
                 ]);
             }
+
             return $this->sendJson([
                 'success' => false,
                 'message' => 'Blog creation failed due to database issue',
                 'status_code' => 502
             ]);
+
         } catch (\Throwable $th) {
-            //throw $th;
             return $this->sendJson([
                 'success' => false,
                 'message' => 'An error occurred: ' . $th->getMessage(),
@@ -76,6 +199,55 @@ class BlogController {
             ]);
         }
     }
+
+    private function resizeAndCropToAspect(string $srcPath, string $destPath, int $targetW, int $targetH, string $mime): bool {
+        switch ($mime) {
+            case 'image/jpeg': $src = imagecreatefromjpeg($srcPath); break;
+            case 'image/png':  $src = imagecreatefrompng($srcPath);  break;
+            case 'image/webp': $src = imagecreatefromwebp($srcPath); break;
+            default: return false;
+        }
+        if (!$src) return false;
+
+        [$w, $h] = getimagesize($srcPath);
+        if ($w <= 0 || $h <= 0) { imagedestroy($src); return false; }
+
+        $targetRatio = $targetW / $targetH;
+        $srcRatio    = $w / $h;
+
+        if ($srcRatio > $targetRatio) {
+            $newW = (int)round($h * $targetRatio);
+            $newH = $h;
+            $srcX = (int)round(($w - $newW) / 2);
+            $srcY = 0;
+        } else {
+            $newW = $w;
+            $newH = (int)round($w / $targetRatio);
+            $srcX = 0;
+            $srcY = (int)round(($h - $newH) / 2);
+        }
+        $dst = imagecreatetruecolor($targetW, $targetH);
+        if ($mime === 'image/png' || $mime === 'image/webp') {
+            imagealphablending($dst, false);
+            imagesavealpha($dst, true);
+            $transparent = imagecolorallocatealpha($dst, 0, 0, 0, 127);
+            imagefilledrectangle($dst, 0, 0, $targetW, $targetH, $transparent);
+        }
+
+        imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $targetW, $targetH, $newW, $newH);
+        $ok = false;
+        if ($mime === 'image/jpeg') {
+            $ok = imagejpeg($dst, $destPath, 85);
+        } elseif ($mime === 'image/png') {
+            $ok = imagepng($dst, $destPath, 6);
+        } elseif ($mime === 'image/webp') {
+            $ok = imagewebp($dst, $destPath, 85);
+        }
+        imagedestroy($src);
+        imagedestroy($dst);
+        return $ok;
+    }
+
 
     public function fetch_blogs() {
         try {
