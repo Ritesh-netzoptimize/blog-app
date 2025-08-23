@@ -9,7 +9,7 @@ class Blog {
     }
 
     public function create($title, $content, $author_id) {
-        if ($author_id == 2) {
+        if ($author_id == 1) {
             $stmt = $this->conn->prepare(
             "INSERT INTO blogs (title, content, author_id, approved) VALUES (:title, :content, :author_id, 1)"
             );

@@ -34,14 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_loggedIn) {
 
         $cleanResult = preg_replace('/^[^{]+/', '', $result);
         $json_response = json_decode($cleanResult, true);
+
         if ($json_response && $json_response['success']) {
-            $responseMessage = "Comment added successfully!";
+            $_SESSION['flash_message'] = "Comment added successfully!";
         } else {
-            $responseMessage = "Failed to add comment.";
+            $_SESSION['flash_message'] = "Failed to add comment.";
         }
     } else {
-        $responseMessage = "Comment cannot be empty.";
+        $_SESSION['flash_message'] = "Comment cannot be empty.";
     }
+
+    // ✅ Redirect to same page to prevent resubmission
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
 }
 ?>
 
@@ -55,23 +60,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_loggedIn) {
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/create-comment.css">
 </head>
 <body>
-    <div class="container">
+    <?php if ($is_loggedIn): ?>
+        <div class="container">
 
         <p>Add a comment</p>
 
-        <?php if (!empty($responseMessage)) : ?>
-            <div class="message"><?php echo $responseMessage; ?></div>
+        <?php if (isset($_SESSION['flash_message'])): ?>
+            <div class="message"><?php echo $_SESSION['flash_message']; ?></div>
+            <?php unset($_SESSION['flash_message']); ?>
         <?php endif; ?>
 
         <form id="commentForm" method="POST" action="">
             <input type="text" name="comment" id="comment" required>
-
             <input type="hidden" name="author_id" value="<?php echo htmlspecialchars($author_id); ?>">
-
             <button type="submit" style="margin-bottom: 20px;">comment</button>
         </form>
     </div>
+    <?php endif ?>
 </body>
+
 <script>
     if (data.success) {
     document.getElementById("formMessage").innerHTML = "<p style='color:green;'>Comment added successfully!</p>";

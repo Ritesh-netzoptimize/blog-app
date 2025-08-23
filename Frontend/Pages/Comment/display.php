@@ -74,12 +74,19 @@ function renderComment($comment, $blogId, $is_loggedIn) {
         <p class="comment-date">On: <?php echo htmlspecialchars($comment['created_at']); ?></p>
 
         <div class="comment-actions">
-            <?php if ($is_loggedIn): ?>
-                <a href="javascript:void(0);" class="reply-toggle" data-id="<?php echo $comment['comment_id']; ?>">Reply</a>
-            <?php else: ?>
-                <span style="color:gray; font-size:0.9em;">Login to reply</span>
-            <?php endif; ?>
-        </div>
+    <?php if ($is_loggedIn): ?>
+        <a href="javascript:void(0);" class="reply-toggle" data-id="<?php echo $comment['comment_id']; ?>">Reply</a>
+        <?php if(($_SESSION['user']['username'] === $comment['username']) || ($_SESSION['user']['role'] === 'admin')):?>
+            <a href="/blog-app/frontend/Pages/comment/delete.php?id=<?php echo $comment['comment_id']; ?>" onclick="return confirm('Are you sure you want to delete this comment?');">Delete</a>
+        <?php endif?>
+        <?php if(($_SESSION['user']['username'] === $comment['username'])): ?>
+            <a href="/blog-app/frontend/Pages/comment/update.php?id=<?php echo $comment['comment_id']; ?>">Edit</a>
+        <?php endif ?>
+    <?php else: ?>
+        <span style="color:gray; font-size:0.9em;">Login to reply</span>
+    <?php endif; ?>
+</div>
+
 
         <div class="reply-section" id="reply-section-<?php echo $comment['comment_id']; ?>">
             <?php if (!empty($replies)): ?>
@@ -119,6 +126,7 @@ body {
     margin: 0;
     padding: 20px;
 }
+
 .comments-section {
     max-width: 800px;
     margin: auto;
@@ -180,14 +188,8 @@ body {
     <?php endif; ?>
 
     <!-- Show add-comment form only if logged in -->
-    <?php if ($is_loggedIn): ?>
-        <form method="POST" action="">
-            <input type="text" name="comment" placeholder="Write a comment..." required>
-            <button type="submit">Comment</button>
-        </form>
-    <?php else: ?>
+    
         <!-- <p style="color: red;">You must be logged in to comment.</p> -->
-    <?php endif; ?>
 </div>
 
 
