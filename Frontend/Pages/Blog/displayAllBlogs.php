@@ -46,9 +46,6 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
 <body>
     <div class="blogs-container">
         <h1>All Blogs</h1>
-        <?php if ($is_loggedIn): ?>
-            <a href="/blog-app/frontend/Pages/Blog/createBlog.php"><div class="create-blog-button">Create New Blog</div></a>
-        <?php endif; ?>
         <?php if ($responseMessage): ?>
             <?php endif; ?>
 
@@ -75,7 +72,9 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
-            <p>No blogs available.</p>
+          <div style="display: flex; justify-content: center; align-items: center; height: 60vh; font-size: 28px; font-weight: bold; color: #e74c3c; text-align: center;">
+            No blogs available.
+        </div>
         <?php endif; ?>
     </div>
 </body>

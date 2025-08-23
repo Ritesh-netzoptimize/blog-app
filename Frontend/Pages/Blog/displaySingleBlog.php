@@ -35,22 +35,23 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
     <meta charset="UTF-8">
     <title>View Blog</title>
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/singleBlog.css">
+
    
 </head>
 <body class="body-container">
     <?php include_once '../../Templates/header.php'; ?>
     <a class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
-    <div class="blog-content" style="position: relative;">
+    <div class="blog-content" style="">
     <!-- Like Button -->
-    <div class="like-container">
+    <div class="like-container" style="display: flex;">
     <?php if ($is_loggedIn): ?>
-        <button 
+        <div 
             id="likeBtn" 
             class="like-btn unliked" 
             data-blogid="<?php echo $blogId; ?>" 
             data-authorid="<?php echo $_SESSION['user']['user_id']; ?>">
             ♥
-        </button>
+    </div>
     <?php else: ?>
         <!-- Show heart but not clickable -->
         <span id="likeBtn" class="like-btn disabled-heart">♥</span>
@@ -65,10 +66,10 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
 <p class="blog-text"><?php echo nl2br(htmlspecialchars($blog['content'])); ?></p>
 
 <?php if (!empty($blog['image_path'])): ?>
-    <div class="blog-image">
-        <img src="/blog-app/backend/<?php echo htmlspecialchars($blog['image_path']); ?>" 
+    <div style="margin-top: 70px; margin-bottom: 50px;" class="blog-image">
+        <img  src="/blog-app/backend/<?php echo htmlspecialchars($blog['image_path']); ?>" 
      alt="Blog Image" 
-     style="margin-left:20px;">
+     style="width: 100%;">
 
     </div>
 <?php endif; ?>
