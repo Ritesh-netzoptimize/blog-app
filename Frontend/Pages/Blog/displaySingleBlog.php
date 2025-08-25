@@ -229,7 +229,7 @@
             <?php echo nl2br(htmlspecialchars($secondHalf)); ?>
         </p>
 
-        <p class="blog-meta">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
+        <p class="blog-meta">Author: <?php echo htmlspecialchars($blog['author_name']); ?></p>
         <p class="blog-meta">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
         <?php if(!$is_loggedIn): ?>
             <a href="/blog-app/frontend/pages/auth/login.php" style="text-decoration:none; color:blue;">Login to add a comment</a>

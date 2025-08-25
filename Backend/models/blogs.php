@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . '/../config/db.php');
+require_once(__DIR__ . '/users.php');
 
 class Blog {
     public $conn;
@@ -94,9 +95,17 @@ class Blog {
         $stmt->bindParam(":blog_id", $blog_id, PDO::PARAM_INT);
         $stmt->execute();
         $blog = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if ($blog) {
+            require_once 'users.php';
+            $userModel = new User($this->conn); 
+            $author = $userModel->getById($blog['author_id']);
+
+            $blog['author_name'] = $author['username'];
+
             return $blog;
         }
+
         return false;
     }
 
