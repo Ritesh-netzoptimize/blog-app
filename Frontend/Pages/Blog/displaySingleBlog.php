@@ -99,6 +99,37 @@
     }
 
 
+    // Fetch user liked blogs
+    $user_id = $_SESSION['user']['user_id'] ?? null;
+    if ($user_id) {
+        $URL = "http://localhost/blog-app/backend/api/v1/blog/user-liked-blogs/$user_id";
+        $ch = curl_init($URL);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        $cleanResult = preg_replace('/^[^{]+/', '', $result);
+        $json_response = json_decode($cleanResult, true);
+
+        if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
+            $user_liked_blogs = $json_response['user_liked_blogs']; 
+            
+            $blog_exists_in_user = false;
+
+            foreach ($user_liked_blogs as $user_liked_blog) {
+                if ($user_liked_blog['blog_id'] == $blogId) {
+                    $blog_exists_in_user = true;
+                    break;
+                }
+            }
+
+
+        } else {
+            die("Failed to fetch blog. Raw response: " . htmlspecialchars($result));
+        }
+    }
+
     $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
     $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
 
@@ -114,18 +145,18 @@
 
 <style>
     .modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        justify-content: center;
+        align-items: center;
     }
     .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
     }
 </style>
 </head>
@@ -139,11 +170,11 @@
     </a>
     <div class="blog-content" style="">
     <!-- Like Button -->
-        <div class="like-container" style="display: flex;">
-            <?php if ($is_loggedIn): ?>
-                <div id="likeBtn" class="like-btn unliked" data-blogid="<?php echo $blogId; ?>" data-authorid="<?php echo $_SESSION['user']['user_id']; ?>">
-                    ♥
-                </div>
+            <div class="like-container" style="display: flex;">
+                <?php if ($is_loggedIn): ?>
+                    <div id="likeBtn" class="like-btn <?php echo $blog_exists_in_user ? 'liked' : 'unliked'; ?>" data-blogid="<?php echo $blogId; ?>" data-authorid="<?php echo $_SESSION['user']['user_id']; ?>">
+                ♥
+            </div>
             <?php else: ?>
             <!-- Show heart but not clickable -->
                 <span id="likeBtn" class="like-btn disabled-heart">
@@ -195,66 +226,131 @@
     <?php include_once '../../Templates/footer.php'; ?>
 
 <script>
-    
-        document.addEventListener("DOMContentLoaded", function () {
-        const likeBtn = document.getElementById("likeBtn");
-        const modal = document.getElementById("loginModal");
-        const goLogin = document.getElementById("goLogin");
-        const closeModal = document.getElementById("closeModal");
 
-        likeBtn.addEventListener("click", () => {
-            modal.style.display = "flex";
-        });
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     const likeBtn = document.getElementById("likeBtn");
+        //     const modal = document.getElementById("loginModal");
+        //     const goLogin = document.getElementById("goLogin");
+        //     const closeModal = document.getElementById("closeModal");
 
-        goLogin.addEventListener("click", () => {
-            window.location.href = "/blog-app/frontend/Pages/Auth/login.php";
-        });
+        //     likeBtn.addEventListener("click", () => {
+        //         modal.style.display = "flex";
+        //     });
 
-        closeModal.addEventListener("click", () => {
-            modal.style.display = "none";
-        });
-    });
+        //     goLogin.addEventListener("click", () => {
+        //         window.location.href = "/blog-app/frontend/Pages/Auth/login.php";
+        //     });
+
+        //     closeModal.addEventListener("click", () => {
+        //         modal.style.display = "none";
+        //     });
+        // });
+
+        // document.addEventListener("DOMContentLoaded", async function () {
+        //     const blogId = "<?php echo $blogId; ?>";
+        //     const likeCountEl = document.getElementById("likeCount");
+        //     const likeBtn = document.getElementById("likeBtn");
+
+        //     // Fetch like count
+        //     const res = await fetch(`http://localhost/blog-app/backend/api/v1/blog/likes-count/${blogId}`);
+        //     const data = await res.json();
+        //     if (data.success) {
+        //         likeCountEl.innerText = data.Likes_count;
+        //     }
+
+        //     // If user is logged in, enable toggle
+        //     <?php if ($is_loggedIn): ?>
+        //     likeBtn.addEventListener("click", async function () {
+        //         const authorId = this.dataset.authorid;
+
+        //         const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/like/${blogId}`, {
+        //             method: "POST",
+        //             headers: { "Content-Type": "application/json" },
+        //             body: JSON.stringify({ author_id: authorId })
+        //         });
+
+        //         const result = await response.json();
+        //         if (result.success) {
+        //             const likedResult = result.liked_result;
+        //             likeCountEl.innerText = likedResult.totalLikes;
+
+        //             if (likedResult.status === "liked") {
+        //                 likeBtn.classList.remove("unliked");
+        //                 likeBtn.classList.add("liked");
+        //             } else {
+        //                 likeBtn.classList.remove("liked");
+        //                 likeBtn.classList.add("unliked");
+        //             }
+        //         }
+        //     });
+        //     <?php endif; ?>
+
+        // });
 
         document.addEventListener("DOMContentLoaded", async function () {
-        const blogId = "<?php echo $blogId; ?>";
-        const likeCountEl = document.getElementById("likeCount");
-        const likeBtn = document.getElementById("likeBtn");
+            const likeBtn = document.getElementById("likeBtn");
+            const modal = document.getElementById("loginModal");
+            const goLogin = document.getElementById("goLogin");
+            const closeModal = document.getElementById("closeModal");
+            const blogId = "<?php echo $blogId; ?>";
+            const likeCountEl = document.getElementById("likeCount");
 
-        // Fetch like count
-        const res = await fetch(`http://localhost/blog-app/backend/api/v1/blog/likes-count/${blogId}`);
-        const data = await res.json();
-        if (data.success) {
-            likeCountEl.innerText = data.Likes_count;
-        }
-
-        // If user is logged in, enable toggle
-        <?php if ($is_loggedIn): ?>
-        likeBtn.addEventListener("click", async function () {
-            const authorId = this.dataset.authorid;
-
-            const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/like/${blogId}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ author_id: authorId })
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                const likedResult = result.liked_result;
-                likeCountEl.innerText = likedResult.totalLikes;
-
-                if (likedResult.status === "liked") {
-                    likeBtn.classList.remove("unliked");
-                    likeBtn.classList.add("liked");
-                } else {
-                    likeBtn.classList.remove("liked");
-                    likeBtn.classList.add("unliked");
+            // Fetch like count
+            try {
+                const res = await fetch(`http://localhost/blog-app/backend/api/v1/blog/likes-count/${blogId}`);
+                const data = await res.json();
+                if (data.success) {
+                    likeCountEl.innerText = data.Likes_count;
                 }
+            } catch (err) {
+                console.error("Failed to fetch like count:", err);
             }
-        });
-        <?php endif; ?>
 
-    });
+            // If not logged in → clicking heart shows modal
+            <?php if (!$is_loggedIn): ?>
+                likeBtn?.addEventListener("click", () => {
+                    modal.style.display = "flex";
+                });
+                goLogin?.addEventListener("click", () => {
+                    window.location.href = "/blog-app/frontend/Pages/Auth/login.php";
+                });
+                closeModal?.addEventListener("click", () => {
+                    modal.style.display = "none";
+                });
+            <?php endif; ?>
+
+            // If logged in → toggle like
+            <?php if ($is_loggedIn): ?>
+                likeBtn?.addEventListener("click", async function () {
+                    const authorId = this.dataset.authorid;
+
+                    try {
+                        const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/like/${blogId}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ author_id: authorId })
+                        });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            const likedResult = result.liked_result;
+                            likeCountEl.innerText = likedResult.totalLikes;
+                           if (likedResult.status === "liked") {
+                                likeBtn.classList.remove("unliked");
+                                likeBtn.classList.add("liked");
+                            } else {
+                                likeBtn.classList.remove("liked");
+                                likeBtn.classList.add("unliked");
+                            }
+                        }
+
+                    } catch (err) {
+                        console.error("Error liking blog:", err);
+                    }
+                });
+            <?php endif; ?>
+        });
+
 
 </script>
 

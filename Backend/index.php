@@ -58,7 +58,12 @@ switch ($resource) {
             }
         }
         elseif($action === "user-liked-blogs") {
-            $like_controller->fetch_blogs_by_user_likes($input);
+            $user_id = $segments[6] ?? null;
+            if ($user_id) {
+                $like_controller->fetch_blogs_by_user_likes($user_id);
+            } else {
+                echo json_encode(["success" => false, "message" => "user_id is required"]);
+            }
         }
         elseif ($action === "fetch-single") { 
             $blog_id = $segments[6] ?? null;

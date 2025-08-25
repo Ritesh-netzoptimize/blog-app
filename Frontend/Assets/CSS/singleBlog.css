@@ -94,6 +94,8 @@
     color: #e74c3c; 
     transition: transform 0.2s ease, color 0.2s ease;
 }
+.like-btn.liked { color: #e63946; }
+.like-btn.unliked { color: #aaa; }
 
 .like-btn:hover {
     transform: scale(1.3);

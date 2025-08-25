@@ -111,16 +111,12 @@ class LikeController {
         }
     }
 
-    public function fetch_blogs_by_user_likes($data) {
+    public function fetch_blogs_by_user_likes($user_id) {
         try {
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
-            $user_id="";
-            if (isset($data['user_id'])) $user_id = trim($data['user_id']) ?? $_SESSION['user_id'] ?? null;
-            if (!$user_id) {
-                $user_id = $_SESSION['user_id'] ?? null;
-            }
+            
             if (!$user_id) {
                 return $this->sendJson([
                     'success' => false,
@@ -135,7 +131,7 @@ class LikeController {
                     'success' => true,
                     'message' => 'Users liked blog fetched successfully',
                     'status_code' => 200,
-                    'Likes_count' => $user_liked_blogs
+                    'user_liked_blogs' => $user_liked_blogs
                 ]);
             }
             return $this->sendJson([
