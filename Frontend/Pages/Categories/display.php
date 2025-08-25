@@ -138,6 +138,7 @@ $categoryTree = buildTree($categories);
 
         
     </div>
+    <?php include "../../templates/footer.php" ?>
 
     <script>
         const form = document.getElementById("topCategoryForm");

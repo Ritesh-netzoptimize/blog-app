@@ -95,6 +95,7 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
             <p  style="text-align:center; font-size:18px; color:#555; margin-top:20px;">No blogs waiting for approval.</p>
         <?php endif; ?>
     </div>
+    <?php include_once "../Templates/footer.php"?>
 
     <script>
 document.querySelectorAll(".approve-btn").forEach(btn => {

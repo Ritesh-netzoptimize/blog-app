@@ -166,6 +166,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Create Blog</button>
     </form>
 </div>
+<?php include_once '../../Templates/footer.php'; ?>
+
 </body>
 <script>
 document.getElementById("blog_image").addEventListener("change", function(event) {

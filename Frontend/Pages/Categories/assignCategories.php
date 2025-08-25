@@ -132,6 +132,7 @@ $blogId = isset($_GET['id']) ? intval($_GET['id']) : 0;
         <button class="assign-btn" id="assignBtn">Assign Category</button>
         <div id="assignMessage"></div>
     </div>
+    <?php include_once "../../Templates/footer.php"?>
 
     <script>
         const categorySelect = document.getElementById("categorySelect");

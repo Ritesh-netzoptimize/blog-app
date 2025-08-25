@@ -40,7 +40,7 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
 </head>
 <body class="body-container">
     <?php include_once '../../Templates/header.php'; ?>
-    <a class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
+    <a style="margin-top: 5px; width: fit-content;" class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
     <div class="blog-content" style="">
     <!-- Like Button -->
     <div class="like-container" style="display: flex;">
@@ -83,6 +83,7 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
     <?php include_once '../Comment/display.php'; ?>
 </div>
 
+    <?php include_once '../../Templates/footer.php'; ?>
 
     <script>
     document.addEventListener("DOMContentLoaded", async function () {

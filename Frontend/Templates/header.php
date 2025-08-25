@@ -20,7 +20,7 @@ $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
 <body>
 
 <header class="header">
-    <div class="logo">LOGO</div>
+    <a href="/blog-app/frontend/index.php/" class="logo">LOGO</div>
     <nav class="nav-links">
         <a href="/blog-app/frontend/index.php">Home</a>
         <a href="/blog-app/frontend/pages/categories/display.php">Blogs</a>

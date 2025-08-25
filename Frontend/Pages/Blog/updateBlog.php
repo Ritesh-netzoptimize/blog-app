@@ -124,5 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </form>
     </div>
+    <?php include_once '../../Templates/footer.php'; ?>
+
 </body>
 </html>

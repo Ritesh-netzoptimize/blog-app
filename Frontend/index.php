@@ -8,5 +8,6 @@
 <body>
     <?php include 'Templates/header.php'; ?>
     <?php include  'Pages/Blog/displayAllBlogs.php'?>
+    <?php include 'Templates/footer.php' ;?>
 </body>
 </html>

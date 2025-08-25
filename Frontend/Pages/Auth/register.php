@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cleanResult = preg_replace('/^[^{]+/', '', $result);
     $json_response = json_decode($cleanResult, true);
 
-    var_dump($json_response);
-    var_dump(isset($json_response['success']));
-    var_dump($json_response['success']);
+    // var_dump($json_response);
+    // var_dump(isset($json_response['success']));
+    // var_dump($json_response['success']);
 
     if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
         $_SESSION['user'] = $json_response['user'];
@@ -50,7 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: /blog-app/frontend/Pages/Auth/success_login.php');
         exit();
     } else {
-        $responseMessage = "Register failed. Raw response: " . htmlspecialchars($result);
+        if ($json_response && isset($json_response['message'])) {
+        // show only backend message like "Incorrect password" or "User not found"
+        $responseMessage = "Login failed: " . htmlspecialchars($json_response['message']);
+    } else {
+        // fallback in case backend sends something unexpected
+        $responseMessage = "Login failed. Raw response: " . htmlspecialchars($result);
+    }
     }
 }
 ?>
@@ -69,8 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h1>Register page</h1>
 
         <?php if ($responseMessage): ?>
-        <p><?=    ($responseMessage) ?></p>
+            <p style="color: red; font-weight: bold; text-align: center;">
+                <?= $responseMessage ?>
+            </p>
         <?php endif; ?>
+
         
         <form method="post">
             <label for="username">Username:</label>

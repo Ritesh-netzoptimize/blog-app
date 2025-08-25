@@ -82,12 +82,25 @@ if ($result) {
             text-decoration: none;
             color: black;
         }
+        .back-link {
+            display: inline-block;
+            text-decoration: none;
+            padding: 0.8rem 1.2rem 0.8rem 1.2rem;
+            background-color: #fff !important;
+            color: #2980b9 !important;
+            border-radius: 6px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            transition: all 0.2s ease-in-out !important;
+        }
+        
     </style>
 </head>
 <body>
     <?php include_once '../../../Templates/header.php'; ?>
+    <a style="margin-top: 5px; display: inline-block; width : fit-content;" class="back-link" href="javascript:history.back()"><div class="back-button">Back</div></a>
     <div class="blogs-container">
-        <a href="/blog-app/frontend/Pages/categories/display.php">Back to Categories</a>
+        <!-- <a href="/blog-app/frontend/Pages/categories/display.php">Back to Categories</a> -->
+
         <h1>Blogs in this Category</h1>
         <?php if ($is_admin): ?>
             <div class="form-container">
@@ -131,11 +144,12 @@ if ($result) {
                 <?php endforeach; ?>
             </ul>
         <?php else: ?>
-            <p>No blogs available for this category.</p>
+            <p style="display:flex; color:red; justify-content:center; align-items:center; height:60vh; font-size:22px; font-weight:bold; text-align:center;">No blogs available for this category.</p>
         <?php endif; ?>
 
         
     </div>
+    <?php include_once '../../../Templates/footer.php'; ?>
 
     <script>
         const form = document.getElementById("subcategoryForm");

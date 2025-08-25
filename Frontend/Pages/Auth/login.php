@@ -51,7 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         exit();
     } else {
+        if ($json_response && isset($json_response['message'])) {
+        // show only backend message like "Incorrect password" or "User not found"
+        $responseMessage = "Login failed: " . htmlspecialchars($json_response['message']);
+    } else {
+        // fallback in case backend sends something unexpected
         $responseMessage = "Login failed. Raw response: " . htmlspecialchars($result);
+    }
     }
 }
 ?>
@@ -70,8 +76,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h1>Login page</h1>
 
         <?php if ($responseMessage): ?>
-            <p><?= ($responseMessage) ?></p>
+            <p style="color: red; font-weight: bold; text-align: center;">
+                <?= $responseMessage ?>
+            </p>
         <?php endif; ?>
+
     
         <form method="post">
             <label for="email">Email:</label>
