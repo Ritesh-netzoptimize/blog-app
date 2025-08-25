@@ -41,6 +41,64 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
     die("Failed to fetch blog. Raw response: " . htmlspecialchars($result));
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
+    $author_id = $_SESSION['user']['user_id'] ?? null;
+    if ($author_id) {
+        $commentData = [
+            'blog_id' => $blogId,
+            'comment' => trim($_POST['comment']),
+            'author_id' => $author_id
+        ];
+
+        $URL = 'http://localhost/blog-app/backend/api/v1/comment/create';
+        $ch = curl_init($URL);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($commentData));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        $json_response = json_decode($result, true);
+        $_SESSION['flash_message'] = $json_response['success'] ? "Comment added successfully!" : "Failed to add comment.";
+
+        header("Location: /blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=$blogId");
+        exit;
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_text'])) {
+    $parentId = intval($_POST['parent_id']);
+    $replyText = trim($_POST['reply_text']);
+    $author_id = $_SESSION['user']['user_id'] ?? null;
+
+    if ($author_id && $parentId && $replyText) {
+        $payload = json_encode([
+            "comment_id" => $parentId,
+            "blog_id" => $blogId,
+            "comment" => $replyText,
+            "author_id" => $author_id
+        ]);
+
+        $URL = "http://localhost/blog-app/backend/api/v1/comment/create";
+        $ch = curl_init($URL);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        $json = json_decode($result, true);
+        $_SESSION['flash_message'] = $json && $json['success'] ? "Reply added successfully!" : "Failed to add reply.";
+    }
+
+    // Always redirect back to avoid resubmission
+    header("Location: /blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=$blogId");
+    exit;
+}
+
+
 $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
 $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
 ?>
@@ -50,6 +108,8 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
     <meta charset="UTF-8">
     <title>View Blog</title>
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/singleBlog.css">
+<link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/create-comment.css">
+<link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/display-comment.css">
 
    
 </head>
@@ -147,6 +207,9 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
         }
     });
     <?php endif; ?>
+    <?php include_once '../Comment/create.php'; ?>
+<?php include_once '../Comment/display.php'; ?>
+
 });
 </script>
 

@@ -41,13 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_text'])) {
     $parentId = intval($_POST['parent_id']);
     $blogId = intval($_POST['blog_id']);
     $replyText = trim($_POST['reply_text']);
-    $author_id = intval($_SESSION['user_id']);
+    $author_id = intval($_SESSION['user']['user_id']);
 
     $payload = json_encode([
         "comment_id" => $parentId,
         "blog_id" => $blogId,
         "comment" => $replyText,
-        "author_id" =>$author_id
+        "author_id" => $author_id   // ✅ Added
     ]);
 
     $URL = "http://localhost/blog-app/backend/api/v1/comment/create";
@@ -58,12 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reply_text'])) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
     $result = curl_exec($ch);
     curl_close($ch);
-    $clean = preg_replace('/^[^{]+/', '', $result);
-    $response = json_decode($clean, true);
+
+    $response = json_decode($result, true);
     $responseMessage = ($response && $response['success'])
         ? "Reply added successfully!"
         : "Failed to add reply.";
+
+    // ✅ Redirect back to same blog after reply
+    header("Location: /blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=$blogId");
+    exit;
 }
+
 
 function renderComment($comment, $blogId, $is_loggedIn) {
     $replies = fetchReplies($comment['comment_id']);
@@ -178,7 +183,7 @@ body {
 
     <!-- Always show comments -->
     <?php if (!empty($comments)): ?>
-        <ul style="font-size: 10px; list-style-type:none; padding-left:0;">
+        <ul style="font-size: 15px; list-style-type:none; padding-left:0;">
             <?php foreach ($comments as $comment): ?>
                 <?php renderComment($comment, $blogId, $is_loggedIn); ?>
             <?php endforeach; ?>
@@ -187,9 +192,7 @@ body {
         <p style="margin-top: 15px;">No comments yet. Be the first to comment!</p>
     <?php endif; ?>
 
-    <!-- Show add-comment form only if logged in -->
     
-        <!-- <p style="color: red;">You must be logged in to comment.</p> -->
 </div>
 
 
