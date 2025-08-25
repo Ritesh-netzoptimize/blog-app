@@ -96,7 +96,7 @@ $categoryTree = buildTree($categories);
 </head>
 <body>
     <?php include "../../templates/header.php" ?>
-    <div class="category-container">
+    <div class="category-container" style="width: 500px;">
         <h1>All Categories</h1>
         <?php if ($is_admin): ?>
                 <div class="form-container">

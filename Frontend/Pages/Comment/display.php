@@ -70,8 +70,8 @@ function renderComment($comment, $blogId, $is_loggedIn) {
     ?>
     <li class="comment">
         <p><?php echo htmlspecialchars($comment['comment']); ?></p>
-        <p class="comment-author">By: <?php echo htmlspecialchars($comment['username']); ?></p>
-        <p class="comment-date">On: <?php echo htmlspecialchars($comment['created_at']); ?></p>
+        <p style="font-size: 15px;" class="comment-author">By: <?php echo htmlspecialchars($comment['username']); ?></p>
+        <p style="font-size: 13px;" class="comment-date">On: <?php echo htmlspecialchars($comment['created_at']); ?></p>
 
         <div class="comment-actions">
     <?php if ($is_loggedIn): ?>
@@ -83,7 +83,7 @@ function renderComment($comment, $blogId, $is_loggedIn) {
             <a href="/blog-app/frontend/Pages/comment/update.php?id=<?php echo $comment['comment_id']; ?>">Edit</a>
         <?php endif ?>
     <?php else: ?>
-        <span style="color:gray; font-size:0.9em;">Login to reply</span>
+        <span style="color:gray; font-size:1.2em;">Login to reply</span>
     <?php endif; ?>
 </div>
 
@@ -169,22 +169,22 @@ body {
 </head>
 <body>
 
-<div class="comments-section">
+<div  class="comments-section">
     <h2>Comments</h2>
 
     <?php if (!empty($responseMessage)) : ?>
-        <p style="color: green;"><?php echo $responseMessage; ?></p>
+        <p style="color: green; font-size: 20px;"><?php echo $responseMessage; ?></p>
     <?php endif; ?>
 
     <!-- Always show comments -->
     <?php if (!empty($comments)): ?>
-        <ul style="list-style-type:none; padding-left:0;">
+        <ul style="font-size: 10px; list-style-type:none; padding-left:0;">
             <?php foreach ($comments as $comment): ?>
                 <?php renderComment($comment, $blogId, $is_loggedIn); ?>
             <?php endforeach; ?>
         </ul>
     <?php else: ?>
-        <p>No comments yet. Be the first to comment!</p>
+        <p style="margin-top: 15px;">No comments yet. Be the first to comment!</p>
     <?php endif; ?>
 
     <!-- Show add-comment form only if logged in -->

@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="page">
     <?php include_once '../../Templates/header.php'; ?>
 
-    <div class="card">
+    <div class="card" style="width: 50%;">
         <h1 class="card-title">Update Blog</h1>
 
         <?php if (!empty($responseMessage)): ?>

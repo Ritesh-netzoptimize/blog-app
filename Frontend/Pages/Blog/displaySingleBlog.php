@@ -22,6 +22,21 @@ $json_response = json_decode($cleanResult, true);
 
 if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
     $blog = $json_response['blog']; 
+    $content = $blog['content'];
+       $halfLength = intval(strlen($content) / 2);
+   
+       // take first half
+       $firstHalf = substr($content, 0, $halfLength);
+   
+       // find the last space so we don’t cut a word
+       $lastSpace = strrpos($firstHalf, ' ');
+       if ($lastSpace !== false) {
+           $firstHalf = substr($content, 0, $lastSpace);
+           $secondHalf = substr($content, $lastSpace + 1); 
+       } else {
+           // fallback if no space found
+           $secondHalf = substr($content, $halfLength);
+       }
 } else {
     die("Failed to fetch blog. Raw response: " . htmlspecialchars($result));
 }
@@ -57,26 +72,34 @@ $author_id = $is_loggedIn ? $_SESSION['user']['user_id'] : null;
         <span id="likeBtn" class="like-btn disabled-heart">♥</span>
     <?php endif; ?>
 
-    <!-- Always show like count -->
-    <span id="likeCount" class="like-count">0</span>
-</div>
+        <!-- Always show like count -->
+        <span id="likeCount" class="like-count">0</span>
+    </div>
 
 
    <h1 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h1>
-<p class="blog-text"><?php echo nl2br(htmlspecialchars($blog['content'])); ?></p>
 
-<?php if (!empty($blog['image_path'])): ?>
-    <div style="margin-top: 70px; margin-bottom: 50px;" class="blog-image">
+    <p class="blog-text">
+        <?php echo nl2br(htmlspecialchars($firstHalf)); ?>
+    </p>
+
+
+    <?php if (!empty($blog['image_path'])): ?>
+    <div style="margin-top: 30px; margin-bottom: 30px;" class="blog-image">
         <img  src="/blog-app/backend/<?php echo htmlspecialchars($blog['image_path']); ?>" 
-     alt="Blog Image" 
-     style="width: 100%;">
-
+        alt="Blog Image" 
+        style="width: 100%;">
+        
     </div>
-<?php endif; ?>
+    <?php endif; ?>
 
-<p class="blog-meta">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
-<p class="blog-meta">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
-<a class="back-link" href="/blog-app/frontend/index.php">Back to all blogs</a>
+    <p class="blog-text">
+        <?php echo nl2br(htmlspecialchars($secondHalf)); ?>
+    </p>
+
+    <p class="blog-meta">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
+    <p class="blog-meta">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
+    <a class="back-link" href="/blog-app/frontend/index.php">Back to all blogs</a>
 
 
     <?php include_once '../Comment/create.php'; ?>
