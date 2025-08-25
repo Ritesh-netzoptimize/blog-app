@@ -126,6 +126,14 @@ class LikeController {
             }
             
             $user_liked_blogs = $this->like->fetchBlogsByUserLikes($user_id);
+            if ($user_liked_blogs == []) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'User has not liked any blog yet',
+                    'status_code' => 200,
+                    'user_liked_blogs' => $user_liked_blogs
+                ]);
+            }
             if ($user_liked_blogs) {
                 return $this->sendJson([
                     'success' => true,
