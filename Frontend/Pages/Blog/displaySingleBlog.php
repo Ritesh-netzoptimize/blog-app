@@ -41,6 +41,23 @@
         die("Failed to fetch blog. Raw response: " . htmlspecialchars($result));
     }
 
+    $URL = "http://localhost/blog-app/backend/api/v1/blog/likes-count/$blogId";
+    $ch = curl_init($URL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $result = curl_exec($ch);
+    curl_close($ch);
+
+    $cleanResult = preg_replace('/^[^{]+/', '', $result);
+    $json_response = json_decode($cleanResult, true);
+
+    if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
+        $likes_count = $json_response['Likes_count']; 
+        
+    } else {
+        $likes_count = 0;
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
         $author_id = $_SESSION['user']['user_id'] ?? null;
         if ($author_id) {
@@ -140,8 +157,8 @@
     <meta charset="UTF-8">
     <title>View Blog</title>
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/singleBlog.css">
-<link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/create-comment.css">
-<link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/display-comment.css">
+    <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/create-comment.css">
+    <!-- <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/display-comment.css"> -->
 
 <style>
     .modal {
@@ -192,7 +209,7 @@
             <?php endif;?>
 
             <!-- Always show like count -->
-            <span id="likeCount" class="like-count">0</span>
+            <span id="likeCount" style="font-size: 15px" class="like-count"><?php echo $likes_count?></span>
         </div>
 
         <h1 class="blog-title"><?php echo htmlspecialchars($blog['title']); ?></h1>
@@ -227,66 +244,6 @@
 
 <script>
 
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     const likeBtn = document.getElementById("likeBtn");
-        //     const modal = document.getElementById("loginModal");
-        //     const goLogin = document.getElementById("goLogin");
-        //     const closeModal = document.getElementById("closeModal");
-
-        //     likeBtn.addEventListener("click", () => {
-        //         modal.style.display = "flex";
-        //     });
-
-        //     goLogin.addEventListener("click", () => {
-        //         window.location.href = "/blog-app/frontend/Pages/Auth/login.php";
-        //     });
-
-        //     closeModal.addEventListener("click", () => {
-        //         modal.style.display = "none";
-        //     });
-        // });
-
-        // document.addEventListener("DOMContentLoaded", async function () {
-        //     const blogId = "<?php echo $blogId; ?>";
-        //     const likeCountEl = document.getElementById("likeCount");
-        //     const likeBtn = document.getElementById("likeBtn");
-
-        //     // Fetch like count
-        //     const res = await fetch(`http://localhost/blog-app/backend/api/v1/blog/likes-count/${blogId}`);
-        //     const data = await res.json();
-        //     if (data.success) {
-        //         likeCountEl.innerText = data.Likes_count;
-        //     }
-
-        //     // If user is logged in, enable toggle
-        //     <?php if ($is_loggedIn): ?>
-        //     likeBtn.addEventListener("click", async function () {
-        //         const authorId = this.dataset.authorid;
-
-        //         const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/like/${blogId}`, {
-        //             method: "POST",
-        //             headers: { "Content-Type": "application/json" },
-        //             body: JSON.stringify({ author_id: authorId })
-        //         });
-
-        //         const result = await response.json();
-        //         if (result.success) {
-        //             const likedResult = result.liked_result;
-        //             likeCountEl.innerText = likedResult.totalLikes;
-
-        //             if (likedResult.status === "liked") {
-        //                 likeBtn.classList.remove("unliked");
-        //                 likeBtn.classList.add("liked");
-        //             } else {
-        //                 likeBtn.classList.remove("liked");
-        //                 likeBtn.classList.add("unliked");
-        //             }
-        //         }
-        //     });
-        //     <?php endif; ?>
-
-        // });
-
         document.addEventListener("DOMContentLoaded", async function () {
             const likeBtn = document.getElementById("likeBtn");
             const modal = document.getElementById("loginModal");
@@ -294,17 +251,6 @@
             const closeModal = document.getElementById("closeModal");
             const blogId = "<?php echo $blogId; ?>";
             const likeCountEl = document.getElementById("likeCount");
-
-            // Fetch like count
-            try {
-                const res = await fetch(`http://localhost/blog-app/backend/api/v1/blog/likes-count/${blogId}`);
-                const data = await res.json();
-                if (data.success) {
-                    likeCountEl.innerText = data.Likes_count;
-                }
-            } catch (err) {
-                console.error("Failed to fetch like count:", err);
-            }
 
             // If not logged in → clicking heart shows modal
             <?php if (!$is_loggedIn): ?>

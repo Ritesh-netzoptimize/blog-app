@@ -120,7 +120,7 @@
                         <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
-                    <p style="font-size: 0.9em; color: gray;">No replies yet.</p>
+                    <p style="font-size: 0.9em; color: gray; margin-top: 8px;">No replies yet.</p>
                 <?php endif; ?>
             </div>
 

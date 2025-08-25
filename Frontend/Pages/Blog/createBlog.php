@@ -72,7 +72,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Create Blog</title>
-    <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/assign-categegory.css">
+    <!-- <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/assign-category.css"> -->
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
