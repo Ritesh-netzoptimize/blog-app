@@ -1,9 +1,9 @@
 <?php
-if ( session_status() === PHP_SESSION_NONE) {   
-    session_start();
-}
-$is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
-$is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
+    if ( session_status() === PHP_SESSION_NONE) {   
+        session_start();
+    }
+    $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
+    $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
 ?>
 
 <!DOCTYPE html>

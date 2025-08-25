@@ -104,8 +104,8 @@ class AuthController {
                     'status_code' => 404
                 ]);
             }
-            echo $password . "\n";
-            echo $dbUser['password'] . "\n";
+            // echo $password . "\n";
+            // echo $dbUser['password'] . "\n";
             if (!password_verify($password, $dbUser['password'])) {
                 return $this->sendJson([
                     'success' => false,

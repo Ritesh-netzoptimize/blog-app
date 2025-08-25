@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/blog-app/frontend/Assets/CSS/footer.css">
 </head>
 <body>
-    <!-- footer.php -->
 <footer class="footer">
     <div class="footer-content">
         <div class="footer-logo">LOGO</div>

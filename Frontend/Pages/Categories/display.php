@@ -1,41 +1,41 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-$is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
-$is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
-
-$URL = "http://localhost/blog-app/backend/api/v1/category/fetch-all";
-$ch = curl_init($URL);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-$result = curl_exec($ch);
-curl_close($ch);
-
-$categories = [];
-if ($result) {
-    $data = json_decode($result, true);
-    if ($data && $data['success'] === true) {
-        $categories = $data['categories'];
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
-}
 
-function buildTree(array $categories, $parentId = null) {
-    $branch = [];
-    foreach ($categories as $category) {
-        if ($category['parent_id'] == $parentId) {
-            $children = buildTree($categories, $category['category_id']);
-            if ($children) {
-                $category['children'] = $children;
-            }
-            $branch[] = $category;
+    $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
+    $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
+
+    $URL = "http://localhost/blog-app/backend/api/v1/category/fetch-all";
+    $ch = curl_init($URL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $result = curl_exec($ch);
+    curl_close($ch);
+
+    $categories = [];
+    if ($result) {
+        $data = json_decode($result, true);
+        if ($data && $data['success'] === true) {
+            $categories = $data['categories'];
         }
     }
-    return $branch;
-}
 
-$categoryTree = buildTree($categories);
+    function buildTree(array $categories, $parentId = null) {
+        $branch = [];
+        foreach ($categories as $category) {
+            if ($category['parent_id'] == $parentId) {
+                $children = buildTree($categories, $category['category_id']);
+                if ($children) {
+                    $category['children'] = $children;
+                }
+                $branch[] = $category;
+            }
+        }
+        return $branch;
+    }
+
+    $categoryTree = buildTree($categories);
 ?>
 
 <!DOCTYPE html>
@@ -85,14 +85,6 @@ $categoryTree = buildTree($categories);
             margin-bottom: 10px;
         }
     </style>
-    <script>
-        function toggleSubcategories(id) {
-            const subList = document.getElementById("sub-" + id);
-            if (subList) {
-                subList.style.display = (subList.style.display === "none") ? "block" : "none";
-            }
-        }
-    </script>
 </head>
 <body>
     <?php include "../../templates/header.php" ?>
@@ -140,48 +132,57 @@ $categoryTree = buildTree($categories);
     </div>
     <?php include "../../templates/footer.php" ?>
 
-    <script>
-        const form = document.getElementById("topCategoryForm");
-        const formMessage = document.getElementById("form-message");
+<script>
 
-        if (form) {
-            form.addEventListener("submit", async function (e) {
-                e.preventDefault();
-
-                const name = document.getElementById("name").value.trim();
-
-                if (!name) {
-                    formMessage.innerHTML = "<p class='error-message'>Category name is required.</p>";
-                    return;
-                }
-
-                const payload = {
-                    name: name,
-                    user_role: "admin",
-                    parent_id: null
-                };
-
-                try {
-                    const response = await fetch("http://localhost/blog-app/backend/api/v1/category/create", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(payload)
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        formMessage.innerHTML = "<p class='success-message'>" + data.message + "</p>";
-                        form.reset();
-                    } else {
-                        formMessage.innerHTML = "<p class='error-message'>" + data.message + "</p>";
-                    }
-                } catch (error) {
-                    formMessage.innerHTML = "<p class='error-message'>Something went wrong. Try again.</p>";
-                }
-            });
+    function toggleSubcategories(id) {
+        const subList = document.getElementById("sub-" + id);
+        if (subList) {
+            subList.style.display = (subList.style.display === "none") ? "block" : "none";
         }
-    </script>
+    }
+    const form = document.getElementById("topCategoryForm");
+    const formMessage = document.getElementById("form-message");
+
+    if (form) {
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+
+            if (!name) {
+                formMessage.innerHTML = "<p class='error-message'>Category name is required.</p>";
+                return;
+            }
+
+            const payload = {
+                name: name,
+                user_role: "admin",
+                parent_id: null
+            };
+
+            try {
+                const response = await fetch("http://localhost/blog-app/backend/api/v1/category/create", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    formMessage.innerHTML = "<p class='success-message'>" + data.message + "</p>";
+                    form.reset();
+                } else {
+                    formMessage.innerHTML = "<p class='error-message'>" + data.message + "</p>";
+                }
+            } catch (error) {
+                formMessage.innerHTML = "<p class='error-message'>Something went wrong. Try again.</p>";
+            }
+        });
+    }
+
+</script>
+
 </body>
 </html>

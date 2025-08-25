@@ -1,24 +1,25 @@
 <?php
-session_start();
+    session_start();
 
-$categoriesURL = "http://localhost/blog-app/backend/api/v1/category/fetch-all";
-$ch = curl_init($categoriesURL);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-$catResult = curl_exec($ch);
-curl_close($ch);
+    $categoriesURL = "http://localhost/blog-app/backend/api/v1/category/fetch-all";
+    $ch = curl_init($categoriesURL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $catResult = curl_exec($ch);
+    curl_close($ch);
 
-$categories = [];
-if ($catResult) {
-    $catData = json_decode($catResult, true);
-    if ($catData && $catData['success'] === true) {
-        $categories = $catData['categories'];
+    $categories = [];
+    if ($catResult) {
+        $catData = json_decode($catResult, true);
+        if ($catData && $catData['success'] === true) {
+            $categories = $catData['categories'];
+        }
     }
-}
 
-// Assume $blogId is passed from previous page
-$blogId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+    // Assume $blogId is passed from previous page
+    $blogId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -132,56 +133,60 @@ $blogId = isset($_GET['id']) ? intval($_GET['id']) : 0;
         <button class="assign-btn" id="assignBtn">Assign Category</button>
         <div id="assignMessage"></div>
     </div>
+
     <?php include_once "../../Templates/footer.php"?>
 
-    <script>
-        const categorySelect = document.getElementById("categorySelect");
-        const selectedCategory = document.getElementById("selectedCategory");
-        const assignBtn = document.getElementById("assignBtn");
-        const assignMessage = document.getElementById("assignMessage");
-        const blogId = <?php echo $blogId; ?>;
+<script>
 
-        let chosenCategoryId = null;
+    const categorySelect = document.getElementById("categorySelect");
+    const selectedCategory = document.getElementById("selectedCategory");
+    const assignBtn = document.getElementById("assignBtn");
+    const assignMessage = document.getElementById("assignMessage");
+    const blogId = <?php echo $blogId; ?>;
 
-        categorySelect?.addEventListener("change", function() {
-            chosenCategoryId = this.value;
-            if (chosenCategoryId) {
-                const selectedText = this.options[this.selectedIndex].text;
-                selectedCategory.innerHTML = "Selected: " + selectedText;
+    let chosenCategoryId = null;
+
+    categorySelect?.addEventListener("change", function() {
+        chosenCategoryId = this.value;
+        if (chosenCategoryId) {
+            const selectedText = this.options[this.selectedIndex].text;
+            selectedCategory.innerHTML = "Selected: " + selectedText;
+        } else {
+            selectedCategory.innerHTML = "";
+        }
+    });
+
+    assignBtn?.addEventListener("click", async function() {
+        if (!chosenCategoryId) {
+            assignMessage.innerHTML = "<p style='color:red;'>Please select a category first.</p>";
+            return;
+        }
+        const payload = {
+            blog_id: blogId,
+            category_id: chosenCategoryId,
+            user_role: "admin"
+        };
+        try {
+            const response = await fetch(`http://localhost/blog-app/backend/api/v1/category/assign-category/${chosenCategoryId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                assignMessage.innerHTML = "<p style='color:green;'>" + data.message + "</p>";
             } else {
-                selectedCategory.innerHTML = "";
+                assignMessage.innerHTML = "<p style='color:red;'>" + data.message + "</p>";
             }
-        });
+        } catch (error) {
+            assignMessage.innerHTML = "<p style='color:red;'>Something went wrong. Try again.</p>";
+        }
+    });
 
-        assignBtn?.addEventListener("click", async function() {
-            if (!chosenCategoryId) {
-                assignMessage.innerHTML = "<p style='color:red;'>Please select a category first.</p>";
-                return;
-            }
-            const payload = {
-                blog_id: blogId,
-                category_id: chosenCategoryId,
-                user_role: "admin"
-            };
-            try {
-                const response = await fetch(`http://localhost/blog-app/backend/api/v1/category/assign-category/${chosenCategoryId}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
+</script>
 
-                const data = await response.json();
-                if (data.success) {
-                    assignMessage.innerHTML = "<p style='color:green;'>" + data.message + "</p>";
-                } else {
-                    assignMessage.innerHTML = "<p style='color:red;'>" + data.message + "</p>";
-                }
-            } catch (error) {
-                assignMessage.innerHTML = "<p style='color:red;'>Something went wrong. Try again.</p>";
-            }
-        });
-    </script>
 </body>
 </html>

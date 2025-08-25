@@ -35,7 +35,7 @@ class User {
     }
 
     public function fetchAllUsers() {
-        $stmt = $this->conn->prepare("SELECT * FROM users ORDER BY created_at DESC");
+        $stmt = $this->conn->prepare("SELECT user_id, email, role, created_at, updated_at FROM users ORDER BY created_at DESC");
         $stmt->execute();
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if ($users) {

@@ -1,69 +1,69 @@
 <?php
-session_start();
+    session_start();
 
-// Fetch categories (optional, not used in this snippet but kept)
-$categoriesURL = "http://localhost/blog-app/backend/api/v1/category/fetch-all";
-$ch = curl_init($categoriesURL);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-$catResult = curl_exec($ch);
-curl_close($ch);
+    // Fetch categories (optional, not used in this snippet but kept)
+    $categoriesURL = "http://localhost/blog-app/backend/api/v1/category/fetch-all";
+    $ch = curl_init($categoriesURL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $catResult = curl_exec($ch);
+    curl_close($ch);
 
-$categories = [];
-if ($catResult) {
-    $catData = json_decode($catResult, true);
-    if ($catData && $catData['success'] === true) {
-        $categories = $catData['categories'];
-    }
-}
-
-if (!isset($_SESSION['user'])) {
-    die("You must be logged in to create a blog.");
-}
-
-$is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
-$author_id = $_SESSION['user']['user_id'];
-
-$responseMessage = "";
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title   = $_POST['title'] ?? '';
-    $content = $_POST['content'] ?? '';
-    $image   = $_FILES['blog_image'] ?? null;
-
-    if (empty($title) || empty($content)) {
-        $responseMessage = "Title and content cannot be empty.";
-    } else {
-        $postData = [
-            "title"     => $title,
-            "content"   => $content,
-            "author_id" => $author_id,
-        ];
-
-        // Send the actual uploaded file under key 'image'
-        if ($image && $image['error'] === 0) {
-            $postData['image'] = new CURLFile($image['tmp_name'], $image['type'], $image['name']);
+    $categories = [];
+    if ($catResult) {
+        $catData = json_decode($catResult, true);
+        if ($catData && $catData['success'] === true) {
+            $categories = $catData['categories'];
         }
+    }
 
-        $url = "http://localhost/blog-app/backend/api/v1/blog/create";
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData); // send as form-data, NOT json
-        $result = curl_exec($ch);
-        curl_close($ch);
+    if (!isset($_SESSION['user'])) {
+        die("You must be logged in to create a blog.");
+    }
 
-        $cleanResult = preg_replace('/^[^{]+/', '', $result);
-        $json_response = json_decode($cleanResult, true);
+    $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
+    $author_id = $_SESSION['user']['user_id'];
 
-        if ($json_response && !empty($json_response['success'])) {
-            header("Location: /blog-app/frontend/pages/categories/assignCategories.php?id=" . $json_response['blog_id']);
-            exit;
+    $responseMessage = "";
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $title   = $_POST['title'] ?? '';
+        $content = $_POST['content'] ?? '';
+        $image   = $_FILES['blog_image'] ?? null;
+
+        if (empty($title) || empty($content)) {
+            $responseMessage = "Title and content cannot be empty.";
         } else {
-            $responseMessage = "Failed to create blog. Response: " . $result;
+            $postData = [
+                "title"     => $title,
+                "content"   => $content,
+                "author_id" => $author_id,
+            ];
+
+            // Send the actual uploaded file under key 'image'
+            if ($image && $image['error'] === 0) {
+                $postData['image'] = new CURLFile($image['tmp_name'], $image['type'], $image['name']);
+            }
+
+            $url = "http://localhost/blog-app/backend/api/v1/blog/create";
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData); // send as form-data, NOT json
+            $result = curl_exec($ch);
+            curl_close($ch);
+
+            $cleanResult = preg_replace('/^[^{]+/', '', $result);
+            $json_response = json_decode($cleanResult, true);
+
+            if ($json_response && !empty($json_response['success'])) {
+                header("Location: /blog-app/frontend/pages/categories/assignCategories.php?id=" . $json_response['blog_id']);
+                exit;
+            } else {
+                $responseMessage = "Failed to create blog. Response: " . $result;
+            }
         }
     }
-}
 
 ?>
 
@@ -136,13 +136,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+
 <?php include_once '../../Templates/header.php'; ?>
 
 <div class="container">
     <h1>Create a New Blog</h1>
 
     <?php if (!empty($responseMessage)) : ?>
-        <div class="message"><?php echo $responseMessage; ?></div>
+        <div class="message">
+            <?php echo $responseMessage; ?>
+        </div>
     <?php endif; ?>
 
    <form method="POST" action="" enctype="multipart/form-data">
@@ -166,26 +169,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Create Blog</button>
     </form>
 </div>
+
 <?php include_once '../../Templates/footer.php'; ?>
 
 </body>
-<script>
-document.getElementById("blog_image").addEventListener("change", function(event) {
-    const file = event.target.files[0];
-    const previewContainer = document.getElementById("imagePreviewContainer");
-    const previewImage = document.getElementById("imagePreview");
 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            previewImage.src = e.target.result;
-            previewContainer.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-    } else {
-        previewImage.src = "";
-        previewContainer.style.display = "none";
-    }
-});
+<script>
+    document.getElementById("blog_image").addEventListener("change", function(event) {
+        const file = event.target.files[0];
+        const previewContainer = document.getElementById("imagePreviewContainer");
+        const previewImage = document.getElementById("imagePreview");
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewImage.src = "";
+            previewContainer.style.display = "none";
+        }
+    });
 </script>
+
 </html>

@@ -50,7 +50,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Login Successful</h1>
+    <h1>Register Successful</h1>
     <a href="/blog-app/frontend/index.php">Back to Home</a>
   </div>
 </body>

@@ -1,78 +1,78 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['user'])) {
-    die("You must be logged in to update a blog.");
-}
-
-if (!isset($_GET['id'])) {
-    die("Blog ID is missing.");
-}
-
-$blogId = (int) $_GET['id'];
-$responseMessage = "";
-$blog = ["title" => "", "content" => ""];
-
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $URL = "http://localhost/blog-app/backend/api/v1/blog/fetch-single/$blogId";
-    $ch = curl_init($URL);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    $result = curl_exec($ch);
-    curl_close($ch);
-
-    $clean = preg_replace('/^[^{]+/', '', $result);
-    $json = json_decode($clean, true);
-
-    if ($json && !empty($json['success'])) {
-        $blog = $json['blog'];
-    } else {
-        $responseMessage = "Failed to load blog. Raw response: " . htmlspecialchars($result);
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
-}
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title   = trim($_POST['title'] ?? '');
-    $content = trim($_POST['content'] ?? '');
-    if (!isset($_SESSION['user_id'])) {
-                $responseMessage = "Session error: User ID not found. Please log in again.";
-                return;
-            }
-    if ($title === '' || $content === '') {
-        $responseMessage = "Title and content are required.";
-    } else {
-        $URL = "http://localhost/blog-app/backend/api/v1/blog/update/$blogId";
-        $payload = json_encode([
-            "title"   => $title,
-            "content" => $content,
-            // "author_id" => $_SESSION['user']['user_id'] ?? $_SESSION['user_id'] ?? null,
-            "author_id" => $_SESSION['user_id'] ?? null
-        ]);
-        
+    if (!isset($_SESSION['user'])) {
+        die("You must be logged in to update a blog.");
+    }
+
+    if (!isset($_GET['id'])) {
+        die("Blog ID is missing.");
+    }
+
+    $blogId = (int) $_GET['id'];
+    $responseMessage = "";
+    $blog = ["title" => "", "content" => ""];
+
+    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $URL = "http://localhost/blog-app/backend/api/v1/blog/fetch-single/$blogId";
         $ch = curl_init($URL);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         $result = curl_exec($ch);
         curl_close($ch);
 
         $clean = preg_replace('/^[^{]+/', '', $result);
-        $json  = json_decode($clean, true);
+        $json = json_decode($clean, true);
 
         if ($json && !empty($json['success'])) {
-            header("Location: /blog-app/frontend/Pages/adminDashboard.php");
-            exit;
+            $blog = $json['blog'];
         } else {
-            $responseMessage = "Update failed. Response: " . htmlspecialchars($result);
+            $responseMessage = "Failed to load blog. Raw response: " . htmlspecialchars($result);
         }
     }
 
-    $blog['title'] = $title ?? $blog['title'];
-    $blog['content'] = $content ?? $blog['content'];
-}
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $title   = trim($_POST['title'] ?? '');
+        $content = trim($_POST['content'] ?? '');
+        if (!isset($_SESSION['user_id'])) {
+                    $responseMessage = "Session error: User ID not found. Please log in again.";
+                    return;
+                }
+        if ($title === '' || $content === '') {
+            $responseMessage = "Title and content are required.";
+        } else {
+            $URL = "http://localhost/blog-app/backend/api/v1/blog/update/$blogId";
+            $payload = json_encode([
+                "title"   => $title,
+                "content" => $content,
+                // "author_id" => $_SESSION['user']['user_id'] ?? $_SESSION['user_id'] ?? null,
+                "author_id" => $_SESSION['user_id'] ?? null
+            ]);
+            
+            $ch = curl_init($URL);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            $result = curl_exec($ch);
+            curl_close($ch);
+
+            $clean = preg_replace('/^[^{]+/', '', $result);
+            $json  = json_decode($clean, true);
+
+            if ($json && !empty($json['success'])) {
+                header("Location: /blog-app/frontend/Pages/adminDashboard.php");
+                exit;
+            } else {
+                $responseMessage = "Update failed. Response: " . htmlspecialchars($result);
+            }
+        }
+
+        $blog['title'] = $title ?? $blog['title'];
+        $blog['content'] = $content ?? $blog['content'];
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -89,33 +89,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h1 class="card-title">Update Blog</h1>
 
         <?php if (!empty($responseMessage)): ?>
-            <div class="message"><?php echo $responseMessage; ?></div>
-            <script>
-                console.error(<?php echo json_encode($responseMessage); ?>);
-            </script>
+            <div class="message">
+                <?php echo $responseMessage; ?>
+            </div>
         <?php endif; ?>
 
-    <form class="form" method="POST" action="">
+        <form class="form" method="POST" action="">
             <div class="field">
                 <label class="label" for="title">Title</label>
-                <input
-                    class="input"
-                    type="text"
-                    id="title"
-                    name="title"
-                    value="<?php echo htmlspecialchars($blog['title'] ?? ''); ?>"
-                    required
-                />
+                <input class="input" type="text" id="title" name="title" value="<?php echo htmlspecialchars($blog['title'] ?? ''); ?>" required />
             </div>
 
             <div class="field">
                 <label class="label" for="content">Content</label>
-                <textarea
-                    class="textarea"
-                    id="content"
-                    name="content"
-                    required
-                ><?php echo htmlspecialchars($blog['content'] ?? ''); ?></textarea>
+                <textarea class="textarea" id="content" name="content" required ><?php echo htmlspecialchars($blog['content'] ?? ''); ?></textarea>
             </div>
 
             <div class="actions">

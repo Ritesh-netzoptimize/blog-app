@@ -1,41 +1,41 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-$responseMessage = "";
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $responseMessage = "";
 
-$is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
-$is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
+    $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
+    $is_admin = $is_loggedIn && $_SESSION['user']['role'] === 'admin';
 
-if (!$is_admin) {
-    die("Access Denied: Admins only.");
-}
+    if (!$is_admin) {
+        die("Access Denied: Admins only.");
+    }
 
-$URL = 'http://localhost/blog-app/backend/api/v1/blog/fetch-all';
-$ch = curl_init($URL);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Content-Type: application/json'
-]);
-$result = curl_exec($ch);
+    $URL = 'http://localhost/blog-app/backend/api/v1/blog/fetch-all';
+    $ch = curl_init($URL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json'
+    ]);
+    $result = curl_exec($ch);
 
-if ($result === false) {
-    die("cURL Error: " . curl_error($ch));
-}
-curl_close($ch);
+    if ($result === false) {
+        die("cURL Error: " . curl_error($ch));
+    }
+    curl_close($ch);
 
-$cleanResult = preg_replace('/^[^{]+/', '', $result);
-$json_response = json_decode($cleanResult, true);
+    $cleanResult = preg_replace('/^[^{]+/', '', $result);
+    $json_response = json_decode($cleanResult, true);
 
-if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
-    $blogs = $json_response['blogs'];
-    $pendingBlogs = array_filter($blogs, function($b) {
-        return !$b['approved'];
-    });
-} else {
-    $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
-    $blogs = [];
-}
+    if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
+        $blogs = $json_response['blogs'];
+        $pendingBlogs = array_filter($blogs, function($b) {
+            return !$b['approved'];
+        });
+    } else {
+        $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
+        $blogs = [];
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,53 +97,55 @@ if ($json_response && isset($json_response['success']) && $json_response['succes
     </div>
     <?php include_once "../Templates/footer.php"?>
 
-    <script>
-document.querySelectorAll(".approve-btn").forEach(btn => {
-    btn.addEventListener("click", async function() {
-        const blogId = this.dataset.blogId;
-        const label = document.getElementById("approved-label-" + blogId);
-        const button = this;
+<script>
 
-        try {
-            const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/approve-blog/${blogId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    author_id: <?php echo $_SESSION['user']['user_id']; ?>
-                })
-            });
+    document.querySelectorAll(".approve-btn").forEach(btn => {
+        btn.addEventListener("click", async function() {
+            const blogId = this.dataset.blogId;
+            const label = document.getElementById("approved-label-" + blogId);
+            const button = this;
 
-            const responseText = await response.text();
-            console.log("Raw API Response:", responseText);
-
-            let data;
             try {
-                const cleanText = responseText.replace(/^[^{]+/, '');
-                data = JSON.parse(cleanText);
-            } catch (e) {
-                console.error("JSON parse failed:", e);
-                label.innerText = "Invalid response format";
-                label.style.color = "red";
-                return;
-            }
+                const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/approve-blog/${blogId}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        author_id: <?php echo $_SESSION['user']['user_id']; ?>
+                    })
+                });
 
-            if (data.success === true) {
-                button.disabled = true;
-                label.innerText = "Approved";
-                label.style.color = "green";
-            } else {
-                label.innerText = "Failed: " + (data.message || "Unknown error");
+                const responseText = await response.text();
+                console.log("Raw API Response:", responseText);
+
+                let data;
+                try {
+                    const cleanText = responseText.replace(/^[^{]+/, '');
+                    data = JSON.parse(cleanText);
+                } catch (e) {
+                    console.error("JSON parse failed:", e);
+                    label.innerText = "Invalid response format";
+                    label.style.color = "red";
+                    return;
+                }
+
+                if (data.success === true) {
+                    button.disabled = true;
+                    label.innerText = "Approved";
+                    label.style.color = "green";
+                } else {
+                    label.innerText = "Failed: " + (data.message || "Unknown error");
+                    label.style.color = "red";
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                label.innerText = "Error approving blog";
                 label.style.color = "red";
             }
-        } catch (err) {
-            console.error("Fetch error:", err);
-            label.innerText = "Error approving blog";
-            label.style.color = "red";
-        }
+        });
     });
-});
+
 </script>
 
 </body>

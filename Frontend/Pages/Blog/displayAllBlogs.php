@@ -1,33 +1,33 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-$responseMessage = "";
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $responseMessage = "";
 
-$is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
+    $is_loggedIn = isset($_SESSION['user']) && isset($_SESSION['session_id']);
 
-$URL = 'http://localhost/blog-app/backend/api/v1/blog/fetch-all';
-$ch = curl_init($URL);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Content-Type: application/json'
-]);
-$result = curl_exec($ch);
+    $URL = 'http://localhost/blog-app/backend/api/v1/blog/fetch-all';
+    $ch = curl_init($URL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json'
+    ]);
+    $result = curl_exec($ch);
 
-if ($result === false) {
-    die("cURL Error: " . curl_error($ch));
-}
-curl_close($ch);
-$cleanResult = preg_replace('/^[^{]+/', '', $result);
-$json_response = json_decode($cleanResult, true);
-if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
-    $blogs = $json_response['blogs'];
-     $approvedBlogs = array_filter($blogs, function($b) {
-        return $b['approved'];
-    });
-} else {
-    $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
-}
+    if ($result === false) {
+        die("cURL Error: " . curl_error($ch));
+    }
+    curl_close($ch);
+    $cleanResult = preg_replace('/^[^{]+/', '', $result);
+    $json_response = json_decode($cleanResult, true);
+    if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
+        $blogs = $json_response['blogs'];
+        $approvedBlogs = array_filter($blogs, function($b) {
+            return $b['approved'];
+        });
+    } else {
+        $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
+    }
 ?>
 
 <!DOCTYPE html>
