@@ -57,15 +57,15 @@
                             <div class="blog-actions">
                                 <?php if ($is_loggedIn): ?>
                                     <?php if ($is_admin): ?>
-                                        <a href="/blog-app/frontend/Pages/blog/delete.php?id=<?php echo $blog['blog_id'] ?>">Delete</a>
-                                        <a href="/blog-app/frontend/Pages/blog/updateBlog.php?id=<?php echo $blog['blog_id'] ?>">Edit</a>
+                                        <a style="background-color: #E34234;" href="/blog-app/frontend/Pages/blog/delete.php?id=<?php echo $blog['blog_id'] ?>">Delete</a>
+                                        <a style="background-color: #6495ED;" href="/blog-app/frontend/Pages/blog/updateBlog.php?id=<?php echo $blog['blog_id'] ?>">Edit</a>
                                     <?php endif; ?>
                                     <?php endif; ?>
                                     <a href="/blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=<?php echo $blog['blog_id'] ?>">View</a>
                             </div>
                             <h2><?php echo htmlspecialchars($blog['title']); ?></h2>
                             <p><?php echo htmlspecialchars(substr($blog['content'], 0, 100) . '...'); ?></p>
-                            <p class="blog-author">Author: <?php echo htmlspecialchars($blog['author_id']); ?></p>
+                            <p class="blog-author">Author: <?php echo htmlspecialchars($blog['author_name']); ?></p>
                             <p class="blog-date">Published on: <?php echo htmlspecialchars($blog['created_at']); ?></p>
                         </li>
                     <?php endif; ?>

@@ -197,24 +197,24 @@
 </head>
 <body>
 
-<div class="comments-section">
-    <h2>Comments</h2>
+    <div style="margin-top:10px;" class="comments-section">
+        <h2>Comments</h2>
 
-    <?php if (!empty($responseMessage)) : ?>
-        <p style="color: green; font-size: 20px;"><?php echo $responseMessage; ?></p>
-    <?php endif; ?>
+        <?php if (!empty($responseMessage)) : ?>
+            <p style="color: green; font-size: 20px;"><?php echo $responseMessage; ?></p>
+        <?php endif; ?>
 
-    <!-- Always show comments -->
-    <?php if (!empty($comments)): ?>
-        <ul style="font-size: 15px; list-style-type:none; padding-left:0;">
-            <?php foreach ($comments as $comment): ?>
-                <?php renderComment($comment, $blogId, $is_loggedIn); ?>
-            <?php endforeach; ?>
-        </ul>
-    <?php else: ?>
-        <p style="margin-top: 15px;">No comments yet. Be the first to comment!</p>
-    <?php endif; ?>
-</div>
+        <!-- Always show comments -->
+        <?php if (!empty($comments)): ?>
+            <ul style="font-size: 15px; list-style-type:none; padding-left:0;">
+                <?php foreach ($comments as $comment): ?>
+                    <?php renderComment($comment, $blogId, $is_loggedIn); ?>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p style="margin-top: 15px;">No comments yet. Be the first to comment!</p>
+        <?php endif; ?>
+    </div>
 
 
 <script>

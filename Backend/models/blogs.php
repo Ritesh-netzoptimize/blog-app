@@ -55,6 +55,14 @@ class Blog {
         $stmt->execute();
         $blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if ($blogs) {
+            require_once 'users.php';
+            $userModel = new User($this->conn); 
+
+            foreach ($blogs as &$blog) {
+                $author = $userModel->getById($blog['author_id']);
+                $blog['author_name'] = $author['username'] ?: null; 
+            }
+
             return $blogs;
         }
         return [];

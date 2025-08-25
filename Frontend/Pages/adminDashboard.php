@@ -63,12 +63,12 @@
             cursor: not-allowed;
         }
         .disapproved-label {
-            color: red;
+            color: #E34234;
             font-weight: bold;
             margin-left: 10px;
         }
         .disapprove-btn {
-            background: red;
+            background: #E34234;
             color: white;
             border: none;
             padding: 5px 10px;
@@ -117,7 +117,7 @@
     <?php include_once "../Templates/footer.php"?>
 
 <script>
-    
+
     document.querySelectorAll(".approve-btn, .disapprove-btn").forEach(btn => {
         btn.addEventListener("click", async function() {
             const blogId = this.dataset.blogId;
