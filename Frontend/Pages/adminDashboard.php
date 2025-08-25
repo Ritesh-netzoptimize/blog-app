@@ -30,7 +30,7 @@
     if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
         $blogs = $json_response['blogs'];
         $pendingBlogs = array_filter($blogs, function($b) {
-            return !$b['approved'];
+            return $b['approved']===0;
         });
     } else {
         $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
@@ -62,6 +62,23 @@
             background: #aaa;
             cursor: not-allowed;
         }
+        .disapproved-label {
+            color: red;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .disapprove-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .disapprove-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -76,12 +93,14 @@
         <?php if (isset($pendingBlogs) && count($pendingBlogs) > 0): ?>
             <ul class="blogs-list">
                 <?php foreach ($blogs as $blog): ?>
-                    <?php if (!$blog['approved']): ?> 
+                    <?php if ($blog['approved']===0): ?> 
                         <li class="blog-item" id="blog-<?php echo $blog['blog_id']; ?>">
                             <div class="blog-actions">
                                 <a href="/blog-app/frontend/Pages/Blog/displaySingleBlog.php?id=<?php echo $blog['blog_id']; ?>">View</a>
                                 <button class="approve-btn" data-blog-id="<?php echo $blog['blog_id']; ?>">Approve</button>
+                                <button class="disapprove-btn" data-blog-id="<?php echo $blog['blog_id']; ?>">Disapprove</button>
                                 <span class="approved-label" id="approved-label-<?php echo $blog['blog_id']; ?>"></span>
+                                <span class="disapproved-label" id="disapproved-label-<?php echo $blog['blog_id']; ?>"></span>
                             </div>
                             <h2><?php echo htmlspecialchars($blog['title']); ?></h2>
                             <p><?php echo htmlspecialchars(substr($blog['content'], 0, 150) . '...'); ?></p>
@@ -98,15 +117,19 @@
     <?php include_once "../Templates/footer.php"?>
 
 <script>
-
-    document.querySelectorAll(".approve-btn").forEach(btn => {
+    
+    document.querySelectorAll(".approve-btn, .disapprove-btn").forEach(btn => {
         btn.addEventListener("click", async function() {
             const blogId = this.dataset.blogId;
-            const label = document.getElementById("approved-label-" + blogId);
-            const button = this;
+            const isApprove = this.classList.contains("approve-btn");
+            const label = document.getElementById(isApprove ? "approved-label-" + blogId : "disapproved-label-" + blogId);
+
+            // Get both buttons
+            const approveBtn = document.querySelector(`.approve-btn[data-blog-id='${blogId}']`);
+            const disapproveBtn = document.querySelector(`.disapprove-btn[data-blog-id='${blogId}']`);
 
             try {
-                const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/approve-blog/${blogId}`, {
+                const response = await fetch(`http://localhost/blog-app/backend/api/v1/blog/${isApprove ? 'approve-blog' : 'disapprove-blog'}/${blogId}`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -117,30 +140,31 @@
                 });
 
                 const responseText = await response.text();
-                console.log("Raw API Response:", responseText);
-
                 let data;
                 try {
                     const cleanText = responseText.replace(/^[^{]+/, '');
                     data = JSON.parse(cleanText);
                 } catch (e) {
-                    console.error("JSON parse failed:", e);
                     label.innerText = "Invalid response format";
                     label.style.color = "red";
                     return;
                 }
 
                 if (data.success === true) {
-                    button.disabled = true;
-                    label.innerText = "Approved";
-                    label.style.color = "green";
+                    // Disable both buttons
+                    approveBtn.disabled = true;
+                    disapproveBtn.disabled = true;
+
+                    // Show label
+                    label.innerText = isApprove ? "Approved" : "Disapproved";
+                    label.style.color = isApprove ? "green" : "red";
                 } else {
                     label.innerText = "Failed: " + (data.message || "Unknown error");
                     label.style.color = "red";
                 }
             } catch (err) {
                 console.error("Fetch error:", err);
-                label.innerText = "Error approving blog";
+                label.innerText = "Error processing request";
                 label.style.color = "red";
             }
         });

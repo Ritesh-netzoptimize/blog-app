@@ -521,11 +521,92 @@ class BlogController {
                     'status_code' => 400
                 ]);
             }
+
+            $blog_id_exists = $this->blog->findBlogById($blog_id);
+            if (!$blog_id_exists) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Blog ID does not exist',
+                    'status_code' => 400
+                ]);
+            }
             $result = $this->blog->approveBlog($blog_id);
             if ($result) {
                 return $this->sendJson([
                     'success' => true,
                     'message' => 'Blog approved successfully',
+                    'status_code' => 200,
+                    'blog' => $result
+                ]);
+            }
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'Blog not found',
+                'status_code' => 404
+            ]);
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
+
+
+    public function disapprove_blog($blog_id, $data) {
+        try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $author_id="";
+            if (isset($data['author_id'])) $author_id = trim($data['author_id']) ?? $_SESSION['user_id'] ?? null;
+            if (!$author_id) {
+                $author_id = $_SESSION['user_id'] ?? null;
+            }
+
+            if (!$author_id) {
+                $author_id = isset($_COOKIE['user_id']) ? $_COOKIE['user_id'] : null;
+            }
+
+            
+            if (!$author_id) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'User not authenticated',
+                    'status_code' => 403
+                ]);
+            }
+            $user = new User($this->db);
+            $user_data = $user->getById($author_id);
+            if (!$user_data || $user_data['role'] !== 'admin') {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'User is not authorized to disapprove a blog',
+                    'status_code' => 403
+                ]);
+            }
+            if (!$blog_id) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Blog ID is required',
+                    'status_code' => 400
+                ]);
+            }
+            $blog_id_exists = $this->blog->findBlogById($blog_id);
+            if (!$blog_id_exists) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'Blog ID does not exist',
+                    'status_code' => 400
+                ]);
+            }
+            $result = $this->blog->disApproveBlog($blog_id);
+            if ($result) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'Blog disapproved successfully',
                     'status_code' => 200,
                     'blog' => $result
                 ]);

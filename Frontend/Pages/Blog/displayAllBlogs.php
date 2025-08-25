@@ -23,7 +23,7 @@
     if ($json_response && isset($json_response['success']) && $json_response['success'] === true) {
         $blogs = $json_response['blogs'];
         $approvedBlogs = array_filter($blogs, function($b) {
-            return $b['approved'];
+            return $b['approved']===1;
         });
     } else {
         $responseMessage = "Failed to fetch blogs. Raw response: " . htmlspecialchars($result);
@@ -52,7 +52,7 @@
         <?php if (isset($approvedBlogs) && count($approvedBlogs) > 0): ?>
             <ul class="blogs-list">
                 <?php foreach ($approvedBlogs as $blog): ?>
-                    <?php if($blog['approved']): ?> 
+                    <?php if($blog['approved']===1): ?> 
                         <li class="blog-item">
                             <div class="blog-actions">
                                 <?php if ($is_loggedIn): ?>

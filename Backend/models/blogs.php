@@ -111,6 +111,17 @@ class Blog {
         return false;
     }
 
+    public function disApproveBlog($blog_id) {
+        $stmt = $this->conn->prepare("UPDATE blogs SET approved = 2 WHERE blog_id = :blog_id");
+        $stmt->bindParam(":blog_id", $blog_id, PDO::PARAM_INT);
+        $success = $stmt->execute();
+        echo $success;
+        if ($success) {
+            return true;
+        }
+        return false;
+    }
+
     public function findBlogById($blog_id) {
         $stmt = $this->conn->prepare("SELECT * FROM blogs WHERE blog_id = :blog_id");
         $stmt->bindParam(":blog_id", $blog_id, PDO::PARAM_INT);

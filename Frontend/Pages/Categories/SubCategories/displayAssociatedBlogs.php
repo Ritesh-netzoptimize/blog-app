@@ -128,7 +128,7 @@
         <?php if (!empty($blogs)): ?>
             <ul class="blogs-list">
                 <?php foreach ($blogs as $blog): ?>
-                    <?php if($blog['approved']): ?>
+                    <?php if($blog['approved']===1): ?>
                         <li class="blog-item">
                         <div class="blog-actions">
                             <?php if ($is_loggedIn): ?>
