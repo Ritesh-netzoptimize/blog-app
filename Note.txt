@@ -1,0 +1,1 @@
+send user ID as user_id from frontend in fetching liked blogs of the user

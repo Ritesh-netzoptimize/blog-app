@@ -43,6 +43,13 @@ class Like {
         return $num_of_likes[0]['COUNT(*)'];
     }
 
+    public function fetchBlogsByUserLikes($user_id) {
+        $stmt = $this->conn->prepare("SELECT blog_id from likes where user_id = :user_id");
+        $stmt->execute([':user_id' => $user_id]);
+        $user_liked_blogs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $user_liked_blogs;
+    }
+
 
     // public function getById($comment_id) {
     //     $stmt = $this->conn->prepare("SELECT * FROM comments WHERE comment_id = :comment_id");

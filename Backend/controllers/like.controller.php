@@ -111,6 +111,46 @@ class LikeController {
         }
     }
 
+    public function fetch_blogs_by_user_likes($data) {
+        try {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $user_id="";
+            if (isset($data['user_id'])) $user_id = trim($data['user_id']) ?? $_SESSION['user_id'] ?? null;
+            if (!$user_id) {
+                $user_id = $_SESSION['user_id'] ?? null;
+            }
+            if (!$user_id) {
+                return $this->sendJson([
+                    'success' => false,
+                    'message' => 'User not authenticated as user_id is missing',
+                    'status_code' => 403
+                ]);
+            }
+            
+            $user_liked_blogs = $this->like->fetchBlogsByUserLikes($user_id);
+            if ($user_liked_blogs) {
+                return $this->sendJson([
+                    'success' => true,
+                    'message' => 'Users liked blog fetched successfully',
+                    'status_code' => 200,
+                    'Likes_count' => $user_liked_blogs
+                ]);
+            }
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'User has not liked any blog yet',
+                'status_code' => 404
+            ]);
+        } catch (\Throwable $th) {
+            return $this->sendJson([
+                'success' => false,
+                'message' => 'An error occurred: ' . $th->getMessage(),
+                'status_code' => 500
+            ]);
+        }
+    }
 
     public function sendJson($data) {
         header('Content-Type: application/json');
